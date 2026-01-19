@@ -17,6 +17,7 @@ DEFAULT_FILES = [
     REPO_ROOT / "docs/entregables_dic_2025/04_scripts_validaciones_musems.md",
     REPO_ROOT / "docs/entregables_dic_2025/05_evidencia_ejecucion_scripts_musems.md",
     REPO_ROOT / "docs/entregables_dic_2025/06_resultados_validaciones_musems.md",
+    REPO_ROOT / "docs/entregables_dic_2025/07_reporte_sistema_vida_saludable.md",
 ]
 ALLOWED_TABLE_CHARS = set("|-: ")
 
