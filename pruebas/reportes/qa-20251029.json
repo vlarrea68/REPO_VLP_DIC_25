@@ -1,0 +1,16 @@
+{
+  "endpoint": "https://qa.muses.sep.gob.mx/v1/eventos/carga-masiva",
+  "total_solicitudes": 200,
+  "concurrencia": 20,
+  "duracion_total_segundos": 32.8,
+  "peticiones_por_segundo": 6.1,
+  "exitos": 200,
+  "fallos": 0,
+  "latencia_promedio_ms": 512.0,
+  "latencia_min_ms": 371.0,
+  "latencia_max_ms": 1083.0,
+  "latencia_p90_ms": 701.0,
+  "latencia_p95_ms": 740.0,
+  "latencia_p99_ms": 911.0,
+  "detalle_fallos": []
+}

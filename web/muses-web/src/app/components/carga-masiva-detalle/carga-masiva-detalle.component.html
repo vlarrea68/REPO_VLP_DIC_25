@@ -1,0 +1,31 @@
+<section class="detalle-registro">
+  <header class="detalle-registro__encabezado">
+    <div>
+      <h1>Detalle del registro</h1>
+      <p class="detalle-registro__descripcion">
+        Consulta la información completa del registro recibido en la carga masiva.
+      </p>
+    </div>
+    <button type="button" class="btn secundario" (click)="regresar()">
+      ← Volver a carga masiva
+    </button>
+  </header>
+
+  <ng-container *ngIf="registro(); else sinRegistro">
+    <div class="detalle-registro__tarjeta">
+      <dl class="detalle-registro__lista">
+        <div class="detalle-registro__fila" *ngFor="let campo of campos()">
+          <dt>{{ campo.etiqueta }}</dt>
+          <dd>{{ campo.valor }}</dd>
+        </div>
+      </dl>
+    </div>
+  </ng-container>
+
+  <ng-template #sinRegistro>
+    <div class="detalle-registro__tarjeta detalle-registro__tarjeta--vacia">
+      <p>No se encontró información para mostrar. Regresa a la carga masiva e intenta nuevamente.</p>
+      <button type="button" class="btn primario" (click)="regresar()">Regresar a carga masiva</button>
+    </div>
+  </ng-template>
+</section>

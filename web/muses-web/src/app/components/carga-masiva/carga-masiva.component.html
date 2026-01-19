@@ -1,0 +1,432 @@
+<section class="carga-masiva">
+  <header class="carga-masiva__encabezado">
+    <div class="carga-masiva__titulos carga-masiva__panel">
+      <h1 class="carga-masiva__titulo">Carga masiva de inscripciones</h1>
+      <p class="carga-masiva__descripcion">
+        Sube un archivo CSV con hasta 5&nbsp;000 registros para registrar
+        inscripciones, reinscripciones o bajas. El sistema confirmará que el
+        archivo tenga los encabezados requeridos y enviará los registros tal
+        como se recibieron.
+      </p>
+    </div>
+    <div class="carga-masiva__botones-iniciales">
+      <button
+        type="button"
+        class="btn btn--info"
+        (click)="abrirModalRequisitos()"
+        aria-haspopup="dialog"
+        aria-controls="modal-requisitos"
+      >
+        <svg
+          class="btn__icon"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 4.75a1.25 1.25 0 1 1-1.25 1.25A1.25 1.25 0 0 1 12 6.75Zm1.5 10h-3a.75.75 0 0 1 0-1.5h.75v-3H11a.75.75 0 0 1 0-1.5h1a.75.75 0 0 1 .75.75v3.75h.75a.75.75 0 0 1 0 1.5Z"
+            fill="currentColor"
+          />
+        </svg>
+        <span>Antes de comenzar</span>
+      </button>
+      <button
+        type="button"
+        class="btn btn--plantilla"
+        (click)="descargarPlantilla()"
+      >
+        <svg
+          class="btn__icon"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M12 3v12m0 0 3.5-3.5M12 15 8.5 11.5M5 17.5h14M7 21h10"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span>Descargar plantilla de ejemplo</span>
+      </button>
+    </div>
+  </header>
+
+  <div
+    class="modal-requisitos"
+    *ngIf="mostrarModalRequisitos()"
+    (click)="cerrarModalRequisitos()"
+  >
+    <div
+      id="modal-requisitos"
+      class="modal-requisitos__dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-requisitos-titulo"
+      aria-describedby="modal-requisitos-descripcion"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+      (keydown)="onModalKeydown($event)"
+    >
+      <header class="modal-requisitos__encabezado">
+        <h2 id="modal-requisitos-titulo">Antes de comenzar</h2>
+        <button
+          type="button"
+          class="modal-requisitos__cerrar"
+          (click)="cerrarModalRequisitos()"
+          aria-label="Cerrar"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="m7 7 10 10M7 17 17 7"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </header>
+      <div class="modal-requisitos__contenido">
+        <p id="modal-requisitos-descripcion">
+          Incluye los siguientes encabezados en tu archivo CSV para asegurar la
+          carga correcta de los registros:
+        </p>
+        <ul class="modal-requisitos__lista">
+          <li *ngFor="let encabezado of encabezadosEsperados">
+            {{ encabezado }}
+          </li>
+        </ul>
+        <p class="modal-requisitos__nota">
+          Recuerda exportar el archivo en codificación UTF-8 con encabezados
+          institucionales para evitar caracteres extraños.
+        </p>
+        <a
+          class="modal-requisitos__enlace"
+          [href]="urlDocumentacion"
+          target="_blank"
+          rel="noopener"
+        >
+          Consulta la guía de formato completa
+        </a>
+      </div>
+      <footer class="modal-requisitos__acciones">
+        <button type="button" class="btn plano" (click)="cerrarModalRequisitos()">
+          Entendido
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <form
+    class="carga-masiva__formulario"
+    [formGroup]="formulario"
+    (submit)="onSubmit($event)"
+  >
+    <div
+      class="zona-carga"
+      (dragover)="onArrastreSobreZona($event)"
+      (drop)="onArchivoSoltado($event)"
+      [class.zona-carga--activa]="tieneArchivo()"
+    >
+      <input
+        #fileInput
+        type="file"
+        class="zona-carga__input"
+        accept=".csv,text/csv"
+        (change)="onArchivoSeleccionado($event)"
+      />
+      <p class="zona-carga__texto-principal">
+        Arrastra tu archivo CSV o haz clic para seleccionarlo.
+      </p>
+      <p class="zona-carga__texto-secundario" *ngIf="!tieneArchivo()">
+        Formato recomendado: UTF-8 con encabezados institucionales.
+      </p>
+      <ng-container *ngIf="tieneArchivo()">
+        <p class="zona-carga__archivo">
+          Archivo seleccionado:
+          <strong>{{ nombreArchivoSeleccionado() }}</strong>
+        </p>
+        <dl
+          class="carga-masiva__archivo-detalles"
+          *ngIf="detalleArchivoSeleccionado() as detalles"
+        >
+          <div>
+            <dt>Tamaño</dt>
+            <dd>{{ detalles.tamano }}</dd>
+          </div>
+          <div>
+            <dt>Última modificación</dt>
+            <dd>
+              <ng-container *ngIf="detalles.fecha; else sinFecha">
+                {{ detalles.fecha | date: "medium" }}
+              </ng-container>
+              <ng-template #sinFecha>—</ng-template>
+            </dd>
+          </div>
+          <div>
+            <dt>Filas detectadas</dt>
+            <dd>
+              <ng-container *ngIf="!detalles.calculandoFilas; else calculando">
+                {{ detalles.filas ?? 0 }}
+              </ng-container>
+              <ng-template #calculando>Calculando…</ng-template>
+            </dd>
+          </div>
+        </dl>
+      </ng-container>
+    </div>
+
+    <div class="carga-masiva__opciones">
+      <label>
+        <input type="checkbox" formControlName="reemplazarExistentes" />
+        Sustituir registros previos del lote con los nuevos datos.
+      </label>
+    </div>
+
+    <div class="carga-masiva__acciones">
+      <button
+        type="submit"
+        class="btn primario"
+        [disabled]="!formulario.valid || estaProcesando()"
+      >
+        Procesar archivo
+      </button>
+      <button type="button" class="btn plano" (click)="limpiarSeleccion()">
+        Limpiar selección
+      </button>
+      <button
+        type="button"
+        class="btn plano"
+        *ngIf="estaProcesando()"
+        (click)="cancelarProcesamiento()"
+      >
+        Cancelar procesamiento
+      </button>
+    </div>
+  </form>
+
+  <section
+    class="carga-masiva__estado"
+    *ngIf="
+      estado() === 'procesando' || estado() === 'completado' || estaCancelado()
+    "
+  >
+    <div
+      class="barra-progreso"
+      role="progressbar"
+      [attr.aria-valuenow]="porcentajeAvance()"
+      aria-valuemin="0"
+      aria-valuemax="100"
+    >
+      <div
+        class="barra-progreso__avance"
+        [style.width.%]="porcentajeAvance()"
+      ></div>
+    </div>
+    <div class="carga-masiva__estado-textos">
+      <p class="carga-masiva__progreso">
+        Procesados {{ registrosProcesados() }} de
+        {{ totalRegistros() }} registros ({{ porcentajeAvance() }}%).
+      </p>
+      <p
+        class="carga-masiva__mensaje-estado"
+        *ngIf="mensajeDeProgreso() as mensaje"
+      >
+        {{ mensaje }}
+      </p>
+    </div>
+  </section>
+
+  <p
+    class="carga-masiva__alerta carga-masiva__alerta--error"
+    *ngIf="mensajeDeError() as error"
+  >
+    {{ error }}
+  </p>
+
+  <section
+    class="carga-masiva__almacenamiento"
+    *ngIf="hayRegistrosGuardados()"
+    aria-live="polite"
+  >
+    <div>
+      <p class="carga-masiva__almacenamiento-texto">
+        Los registros procesados se guardan automáticamente en este navegador
+        para que puedas retomarlos más tarde.
+      </p>
+      <p
+        class="carga-masiva__almacenamiento-fecha"
+        *ngIf="ultimaActualizacion() as fecha"
+      >
+        Última actualización: {{ fecha | date: "medium" }}
+      </p>
+    </div>
+    <button
+      type="button"
+      class="btn plano"
+      (click)="limpiarRegistrosGuardados()"
+    >
+      Limpiar registros guardados
+    </button>
+  </section>
+
+  <section class="carga-masiva__controles" *ngIf="registros().length">
+    <div class="carga-masiva__busqueda">
+      <label for="busqueda-registros">Buscar</label>
+      <input
+        #busquedaInput
+        id="busqueda-registros"
+        type="search"
+        placeholder="Buscar por folio, CURP, nombre o flujo"
+        [value]="terminoBusqueda()"
+        (input)="onBusquedaChange(busquedaInput.value)"
+      />
+    </div>
+    <div class="carga-masiva__filtros">
+      <label for="filtro-flujo">Flujo</label>
+      <select
+        #flujoSelect
+        id="filtro-flujo"
+        [value]="flujoSeleccionado()"
+        (change)="onFiltroFlujoChange(flujoSelect.value)"
+      >
+        <option value="todos">Todos</option>
+        <option *ngFor="let flujo of flujosDisponibles()" [value]="flujo">
+          {{ flujo }}
+        </option>
+      </select>
+    </div>
+    <div class="carga-masiva__tamano-pagina">
+      <label for="tamano-pagina">Registros por página</label>
+      <select
+        #tamanoPaginaSelect
+        id="tamano-pagina"
+        [value]="tamanoPaginaActual()"
+        (change)="onTamanoPaginaChange(tamanoPaginaSelect.value)"
+      >
+        <option *ngFor="let tam of opcionesTamanoPagina" [value]="tam">
+          {{ tam }}
+        </option>
+      </select>
+    </div>
+  </section>
+
+  <section class="carga-masiva__tabla-registros" *ngIf="registros().length">
+    <h2>Registros cargados ({{ registrosFiltrados().length }})</h2>
+    <p
+      class="carga-masiva__sin-resultados"
+      *ngIf="!registrosFiltrados().length"
+    >
+      No encontramos registros que coincidan con tu búsqueda. Ajusta los filtros
+      o limpia la búsqueda.
+    </p>
+    <div class="tabla-registros" *ngIf="registrosFiltrados().length">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Folio control</th>
+            <th scope="col">Flujo</th>
+            <th scope="col">Ciclo escolar</th>
+            <th scope="col">CURP</th>
+            <th scope="col">Primer apellido</th>
+            <th scope="col">Segundo apellido</th>
+            <th scope="col">Nombre</th>
+            <th scope="col" class="tabla-registros__acciones-col">Detalles</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let registro of registrosPaginados(); index as indice">
+            <td data-title="#">
+              {{ (paginaActual() - 1) * tamanoPaginaActual() + indice + 1 }}
+            </td>
+            <td data-title="Folio control">{{ registro.folioControl }}</td>
+            <td data-title="Flujo">{{ registro.flujo }}</td>
+            <td data-title="Ciclo escolar">{{ registro.cicloEscolar }}</td>
+            <td data-title="CURP">{{ registro.curp }}</td>
+            <td data-title="Primer apellido">{{ registro.primerApellido }}</td>
+            <td data-title="Segundo apellido">
+              {{ registro.segundoApellido || "—" }}
+            </td>
+            <td data-title="Nombre">{{ registro.nombre }}</td>
+            <td data-title="Detalles" class="tabla-registros__detalle">
+              <button
+                type="button"
+                class="tabla-registros__accion"
+                (click)="verDetalle(registro)"
+                [attr.aria-label]="
+                  'Ver detalles del folio ' +
+                  (registro.folioControl ||
+                    (paginaActual() - 1) * tamanoPaginaActual() + indice + 1)
+                "
+                [attr.title]="
+                  'Ver detalles del folio ' +
+                  (registro.folioControl ||
+                    (paginaActual() - 1) * tamanoPaginaActual() + indice + 1)
+                "
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M11 4.5C6.5 4.5 2.73 7.11 1 11c1.73 3.89 5.5 6.5 10 6.5s8.27-2.61 10-6.5c-1.73-3.89-5.5-6.5-10-6.5Zm0 10.5a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm8.5 5.5-3.15-3.15"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <nav
+      class="tabla-registros__paginacion"
+      *ngIf="registrosFiltrados().length > tamanoPaginaActual()"
+      aria-label="Paginación"
+    >
+      <button
+        type="button"
+        class="tabla-registros__pagina"
+        (click)="paginaAnterior()"
+        [disabled]="paginaActual() === 1"
+      >
+        Anterior
+      </button>
+      <span class="tabla-registros__pagina-actual">
+        Página {{ paginaActual() }} de {{ totalPaginas() }}
+      </span>
+      <button
+        type="button"
+        class="tabla-registros__pagina"
+        (click)="paginaSiguiente()"
+        [disabled]="paginaActual() === totalPaginas()"
+      >
+        Siguiente
+      </button>
+    </nav>
+  </section>
+</section>

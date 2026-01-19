@@ -1,0 +1,1004 @@
+<section class="inscripcion">
+  <div class="inscripcion__intro">
+    <h1>{{ tituloFormulario }}</h1>
+    <p>
+      Captura los datos oficiales del layout de educación superior. Los campos marcados con
+      <span aria-hidden="true">*</span> son obligatorios y se validan conforme a la documentación.
+    </p>
+  </div>
+
+  <form class="inscripcion__card" [formGroup]="inscripcionForm" (ngSubmit)="submit()" novalidate>
+    <div class="inscripcion__config-panel">
+      <div class="inscripcion__config-panel__header">
+        <h2>Configura los campos por institución</h2>
+        <p>
+          Selecciona la institución para activar u omitir campos específicos sin modificar el
+          código del formulario.
+        </p>
+      </div>
+
+      <div
+        class="form-field inscripcion__config-panel__selector"
+        [class.form-field--invalid]="isInvalid('claveInstitucion')"
+        [attr.data-required]="esCampoObligatorio('claveInstitucion')"
+      >
+        <label for="claveInstitucion">Institución responsable <span aria-hidden="true">*</span></label>
+        <select id="claveInstitucion" formControlName="claveInstitucion">
+          <option
+            *ngFor="let option of institucionOptions"
+            [ngValue]="option.value"
+            [disabled]="option.value === ''"
+          >
+            {{ option.label }}
+          </option>
+        </select>
+        <small *ngIf="hasError('claveInstitucion', 'required')">
+          Selecciona la institución responsable.
+        </small>
+        <small *ngIf="hasError('claveInstitucion', 'pattern')">
+          Usa una clave alfanumérica válida.
+        </small>
+      </div>
+
+      <div class="inscripcion__config-panel__estatus">
+        <span class="inscripcion__config-panel__loading" *ngIf="configuracionCargando">
+          Cargando ajustes de campos…
+        </span>
+
+        <ng-container *ngIf="!configuracionCargando">
+          <p class="inscripcion__config-panel__descripcion">
+            {{
+              institucionConfiguracionSeleccionada?.descripcion ||
+                'Se aplica la plantilla nacional por defecto.'
+            }}
+          </p>
+
+          <div
+            class="inscripcion__config-panel__resumen"
+            *ngIf="camposOcultos.length || camposOpcionales.length"
+          >
+            <p *ngIf="camposOcultos.length">
+              Campos inactivos:
+              <span>{{ camposOcultos.join(', ') }}</span>
+            </p>
+            <p *ngIf="camposOpcionales.length">
+              Campos configurados como opcionales:
+              <span>{{ camposOpcionales.join(', ') }}</span>
+            </p>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="inscripcion__section">
+      <h2>Datos administrativos del evento</h2>
+      <div class="form-grid">
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('claveInstitucion')"
+          [attr.data-required]="esCampoObligatorio('claveInstitucion')"
+        >
+          <label for="claveInstitucion">Institución responsable <span>*</span></label>
+          <select id="claveInstitucion" formControlName="claveInstitucion">
+            <option
+              *ngFor="let option of institucionOptions"
+              [ngValue]="option.value"
+              [disabled]="option.value === ''"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('claveInstitucion', 'required')">
+            Selecciona la institución responsable.
+          </small>
+          <small *ngIf="hasError('claveInstitucion', 'pattern')">
+            Usa una clave alfanumérica válida.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('flujo')"
+          [class.form-field--hidden]="!esCampoVisible('flujo')"
+          [attr.data-required]="esCampoObligatorio('flujo')"
+        >
+          <label for="flujo">Flujo <span>*</span></label>
+          <select id="flujo" formControlName="flujo">
+            <option *ngFor="let option of flujoOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('flujo', 'required')">Selecciona el flujo del evento.</small>
+          <small *ngIf="hasError('flujo', 'invalidOption')">Selecciona un valor válido del catálogo.</small>
+          <small *ngIf="hasError('flujo', 'flujoIncompatible')">
+            Para inscripción inicial el grado debe ser 1 y para reinscripción mayor a 1.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('cicloEscolar')"
+          [class.form-field--hidden]="!esCampoVisible('cicloEscolar')"
+          [attr.data-required]="esCampoObligatorio('cicloEscolar')"
+        >
+          <label for="cicloEscolar">Ciclo escolar <span>*</span></label>
+          <input
+            id="cicloEscolar"
+            type="text"
+            formControlName="cicloEscolar"
+            placeholder="2025-2026"
+            inputmode="numeric"
+          />
+          <small *ngIf="hasError('cicloEscolar', 'required')">El ciclo escolar es obligatorio.</small>
+          <small *ngIf="hasError('cicloEscolar', 'cicloEscolarFormato')">Usa el formato AAAA-AAAA.</small>
+          <small *ngIf="hasError('cicloEscolar', 'cicloEscolarSecuencia')">
+            El año de término debe ser el inmediato posterior al inicial.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('anoEscolar')"
+          [class.form-field--hidden]="!esCampoVisible('anoEscolar')"
+          [attr.data-required]="esCampoObligatorio('anoEscolar')"
+        >
+          <label for="anoEscolar">Año escolar <span>*</span></label>
+          <input id="anoEscolar" type="text" formControlName="anoEscolar" placeholder="2025" inputmode="numeric" />
+          <small *ngIf="hasError('anoEscolar', 'required')">El año escolar es obligatorio.</small>
+          <small *ngIf="hasError('anoEscolar', 'pattern')">Debe contener cuatro dígitos.</small>
+          <small *ngIf="hasError('anoEscolar', 'anoFueraDeCiclo')">
+            Debe coincidir con el año inicial del ciclo escolar.
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="inscripcion__section">
+      <h2>Identificación de la persona estudiante</h2>
+      <div class="form-grid">
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('nombreAlumno')"
+          [class.form-field--hidden]="!esCampoVisible('nombreAlumno')"
+          [attr.data-required]="esCampoObligatorio('nombreAlumno')"
+        >
+          <label for="nombreAlumno">Nombre(s) del estudiante <span>*</span></label>
+          <input id="nombreAlumno" type="text" formControlName="nombreAlumno" />
+          <small *ngIf="hasError('nombreAlumno', 'required')">El nombre es obligatorio.</small>
+          <small *ngIf="hasError('nombreAlumno', 'pattern')">
+            Revisa que contenga letras o signos válidos como acentos, guiones, comas o
+            apóstrofes.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('primerApellido')"
+          [class.form-field--hidden]="!esCampoVisible('primerApellido')"
+          [attr.data-required]="esCampoObligatorio('primerApellido')"
+        >
+          <label for="primerApellido">Apellido paterno <span>*</span></label>
+          <input id="primerApellido" type="text" formControlName="primerApellido" />
+          <small *ngIf="hasError('primerApellido', 'required')">El primer apellido es obligatorio.</small>
+          <small *ngIf="hasError('primerApellido', 'pattern')">
+            Revisa que contenga letras o signos válidos como acentos, guiones, comas o
+            apóstrofes.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('segundoApellido')"
+          [class.form-field--hidden]="!esCampoVisible('segundoApellido')"
+          [attr.data-required]="esCampoObligatorio('segundoApellido')"
+        >
+          <label for="segundoApellido">Apellido materno</label>
+          <input id="segundoApellido" type="text" formControlName="segundoApellido" />
+          <small *ngIf="hasError('segundoApellido', 'pattern')">
+            Revisa que contenga letras o signos válidos como acentos, guiones, comas o
+            apóstrofes.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('sexo')"
+          [class.form-field--hidden]="!esCampoVisible('sexo')"
+          [attr.data-required]="esCampoObligatorio('sexo')"
+        >
+          <label for="sexo">Sexo <span>*</span></label>
+          <select id="sexo" formControlName="sexo">
+            <option *ngFor="let option of sexoOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('sexo', 'required')">Selecciona una opción válida del catálogo.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('genero')"
+          [class.form-field--hidden]="!esCampoVisible('genero')"
+          [attr.data-required]="esCampoObligatorio('genero')"
+        >
+          <label for="genero">Género <span>*</span></label>
+          <select id="genero" formControlName="genero">
+            <option *ngFor="let option of generoOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('genero', 'required')">Selecciona el género conforme al catálogo SEP.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('curp')"
+          [class.form-field--hidden]="!esCampoVisible('curp')"
+          [attr.data-required]="esCampoObligatorio('curp')"
+        >
+          <label for="curp">CURP <span>*</span></label>
+          <input id="curp" type="text" formControlName="curp" maxlength="18" />
+          <small *ngIf="hasError('curp', 'required')">La CURP es obligatoria.</small>
+          <small *ngIf="hasError('curp', 'minlength') || hasError('curp', 'maxlength')">La CURP debe tener 18 caracteres.</small>
+          <small *ngIf="hasError('curp', 'pattern')">Ingresa una CURP válida.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('segmentoRaiz')"
+          [class.form-field--hidden]="!esCampoVisible('segmentoRaiz')"
+          [attr.data-required]="esCampoObligatorio('segmentoRaiz')"
+        >
+          <label for="segmentoRaiz">Segmento raíz <span>*</span></label>
+          <input id="segmentoRaiz" type="text" formControlName="segmentoRaiz" maxlength="16" />
+          <small *ngIf="hasError('segmentoRaiz', 'required')">El segmento raíz es obligatorio.</small>
+          <small *ngIf="hasError('segmentoRaiz', 'minlength') || hasError('segmentoRaiz', 'maxlength')">
+            Debe contener 16 caracteres.
+          </small>
+          <small *ngIf="hasError('segmentoRaiz', 'pattern')">Verifica el formato oficial.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('fechaNacimiento')"
+          [class.form-field--hidden]="!esCampoVisible('fechaNacimiento')"
+          [attr.data-required]="esCampoObligatorio('fechaNacimiento')"
+        >
+          <label for="fechaNacimiento">Fecha de nacimiento <span>*</span></label>
+          <input
+            id="fechaNacimiento"
+            type="date"
+            formControlName="fechaNacimiento"
+            [attr.max]="todayIsoString"
+          />
+          <small *ngIf="hasError('fechaNacimiento', 'required')">La fecha de nacimiento es obligatoria.</small>
+          <small *ngIf="hasError('fechaNacimiento', 'dateFormat')">Selecciona una fecha válida.</small>
+          <small *ngIf="hasError('fechaNacimiento', 'futureDate')">La fecha no puede ser futura.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('correoElectronico')"
+          [class.form-field--hidden]="!esCampoVisible('correoElectronico')"
+          [attr.data-required]="esCampoObligatorio('correoElectronico')"
+        >
+          <label for="correoElectronico">Correo electrónico <span>*</span></label>
+          <input id="correoElectronico" type="email" formControlName="correoElectronico" />
+          <small *ngIf="hasError('correoElectronico', 'required')">El correo es obligatorio.</small>
+          <small *ngIf="hasError('correoElectronico', 'email')">Ingresa un correo válido.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('numeroTelefonico')"
+          [class.form-field--hidden]="!esCampoVisible('numeroTelefonico')"
+          [attr.data-required]="esCampoObligatorio('numeroTelefonico')"
+        >
+          <label for="numeroTelefonico">Número telefónico</label>
+          <input id="numeroTelefonico" type="tel" formControlName="numeroTelefonico" maxlength="10" />
+          <small *ngIf="hasError('numeroTelefonico', 'pattern')">Ingresa 10 dígitos sin espacios.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('nacionalidad')"
+          [class.form-field--hidden]="!esCampoVisible('nacionalidad')"
+          [attr.data-required]="esCampoObligatorio('nacionalidad')"
+        >
+          <label for="nacionalidad">Nacionalidad <span>*</span></label>
+          <select id="nacionalidad" formControlName="nacionalidad">
+            <option *ngFor="let option of nacionalidadOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('nacionalidad', 'required')">Selecciona la nacionalidad.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('paisNacimiento')"
+          [class.form-field--hidden]="!esCampoVisible('paisNacimiento')"
+          [attr.data-required]="esCampoObligatorio('paisNacimiento')"
+        >
+          <label for="paisNacimiento">País de nacimiento <span>*</span></label>
+          <select id="paisNacimiento" formControlName="paisNacimiento">
+            <option *ngFor="let option of paisOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('paisNacimiento', 'required')">Selecciona el país de nacimiento.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('entidadNacimiento')"
+          [class.form-field--hidden]="!esCampoVisible('entidadNacimiento')"
+          [attr.data-required]="esCampoObligatorio('entidadNacimiento')"
+        >
+          <label for="entidadNacimiento">Entidad de nacimiento <span>*</span></label>
+          <select id="entidadNacimiento" formControlName="entidadNacimiento">
+            <option *ngFor="let option of entidadOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('entidadNacimiento', 'required')">Selecciona la entidad de nacimiento.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('paisResidencia')"
+          [class.form-field--hidden]="!esCampoVisible('paisResidencia')"
+          [attr.data-required]="esCampoObligatorio('paisResidencia')"
+        >
+          <label for="paisResidencia">País de residencia <span>*</span></label>
+          <select id="paisResidencia" formControlName="paisResidencia">
+            <option *ngFor="let option of paisOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('paisResidencia', 'required')">Selecciona el país de residencia.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('entidadResidencia')"
+          [class.form-field--hidden]="!esCampoVisible('entidadResidencia')"
+          [attr.data-required]="esCampoObligatorio('entidadResidencia')"
+        >
+          <label for="entidadResidencia">Entidad de residencia <span>*</span></label>
+          <select id="entidadResidencia" formControlName="entidadResidencia">
+            <option *ngFor="let option of entidadOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('entidadResidencia', 'required')">Selecciona la entidad de residencia.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="inscripcion__section">
+      <h2>Domicilio y procedencia</h2>
+      <div class="form-grid">
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('tipoVialidad')"
+          [class.form-field--hidden]="!esCampoVisible('tipoVialidad')"
+          [attr.data-required]="esCampoObligatorio('tipoVialidad')"
+        >
+          <label for="tipoVialidad">Tipo de vialidad del domicilio del alumno <span>*</span></label>
+          <select id="tipoVialidad" formControlName="tipoVialidad">
+            <option *ngFor="let option of tipoVialidadOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('tipoVialidad', 'required')">Selecciona el tipo de vialidad.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('nombreVialidad')"
+          [class.form-field--hidden]="!esCampoVisible('nombreVialidad')"
+          [attr.data-required]="esCampoObligatorio('nombreVialidad')"
+        >
+          <label for="nombreVialidad">Nombre de vialidad del domicilio del alumno <span>*</span></label>
+          <input id="nombreVialidad" type="text" formControlName="nombreVialidad" />
+          <small *ngIf="hasError('nombreVialidad', 'required')">Ingresa la vialidad registrada.</small>
+          <small *ngIf="hasError('nombreVialidad', 'pattern')">Utiliza caracteres válidos.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('numeroExterior')"
+          [class.form-field--hidden]="!esCampoVisible('numeroExterior')"
+          [attr.data-required]="esCampoObligatorio('numeroExterior')"
+        >
+          <label for="numeroExterior">Número exterior del domicilio del alumno</label>
+          <input id="numeroExterior" type="text" formControlName="numeroExterior" />
+          <small *ngIf="hasError('numeroExterior', 'pattern')">Utiliza hasta 15 caracteres alfanuméricos.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('numeroInterior')"
+          [class.form-field--hidden]="!esCampoVisible('numeroInterior')"
+          [attr.data-required]="esCampoObligatorio('numeroInterior')"
+        >
+          <label for="numeroInterior">Número interior del domicilio del alumno</label>
+          <input id="numeroInterior" type="text" formControlName="numeroInterior" />
+          <small *ngIf="hasError('numeroInterior', 'pattern')">Utiliza hasta 15 caracteres alfanuméricos.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('codigoPostal')"
+          [class.form-field--hidden]="!esCampoVisible('codigoPostal')"
+          [attr.data-required]="esCampoObligatorio('codigoPostal')"
+        >
+          <label for="codigoPostal">Código postal o C.P. del domicilio del alumno <span>*</span></label>
+          <input id="codigoPostal" type="text" formControlName="codigoPostal" inputmode="numeric" maxlength="5" />
+          <small *ngIf="hasError('codigoPostal', 'required')">El código postal es obligatorio.</small>
+          <small *ngIf="hasError('codigoPostal', 'pattern')">Ingresa cinco dígitos.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('municipioResidencia')"
+          [class.form-field--hidden]="!esCampoVisible('municipioResidencia')"
+          [attr.data-required]="esCampoObligatorio('municipioResidencia')"
+        >
+          <label for="municipioResidencia">Municipio o demarcación territorial del domicilio del alumno <span>*</span></label>
+          <select id="municipioResidencia" formControlName="municipioResidencia">
+            <option *ngFor="let option of municipioOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('municipioResidencia', 'required')">Selecciona el municipio correspondiente.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('entidadDomicilio')"
+          [class.form-field--hidden]="!esCampoVisible('entidadDomicilio')"
+          [attr.data-required]="esCampoObligatorio('entidadDomicilio')"
+        >
+          <label for="entidadDomicilio">Entidad federativa del domicilio del alumno <span>*</span></label>
+          <select id="entidadDomicilio" formControlName="entidadDomicilio">
+            <option *ngFor="let option of entidadOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('entidadDomicilio', 'required')">Selecciona la entidad registrada.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('paisProcedencia')"
+          [class.form-field--hidden]="!esCampoVisible('paisProcedencia')"
+          [attr.data-required]="esCampoObligatorio('paisProcedencia')"
+        >
+          <label for="paisProcedencia">País de procedencia <span>*</span></label>
+          <select id="paisProcedencia" formControlName="paisProcedencia">
+            <option *ngFor="let option of paisOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('paisProcedencia', 'required')">Selecciona el país de procedencia.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('entidadProcedencia')"
+          [class.form-field--hidden]="!esCampoVisible('entidadProcedencia')"
+          [attr.data-required]="esCampoObligatorio('entidadProcedencia')"
+        >
+          <label for="entidadProcedencia">Entidad de procedencia <span>*</span></label>
+          <select id="entidadProcedencia" formControlName="entidadProcedencia">
+            <option *ngFor="let option of entidadOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('entidadProcedencia', 'required')">Selecciona la entidad de procedencia.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('lenguaMaterna')"
+          [class.form-field--hidden]="!esCampoVisible('lenguaMaterna')"
+          [attr.data-required]="esCampoObligatorio('lenguaMaterna')"
+        >
+          <label for="lenguaMaterna">Lengua materna <span>*</span></label>
+          <select id="lenguaMaterna" formControlName="lenguaMaterna">
+            <option *ngFor="let option of lenguaOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('lenguaMaterna', 'required')">Selecciona la lengua materna.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('segundaLengua')"
+          [class.form-field--hidden]="!esCampoVisible('segundaLengua')"
+          [attr.data-required]="esCampoObligatorio('segundaLengua')"
+        >
+          <label for="segundaLengua">Segunda lengua</label>
+          <select id="segundaLengua" formControlName="segundaLengua">
+            <option value="">Seleccione una opción</option>
+            <option *ngFor="let option of lenguaOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+          <small *ngIf="hasError('segundaLengua', 'pattern')">Selecciona una clave válida del catálogo.</small>
+          <small *ngIf="hasError('segundaLengua', 'sameLanguage')">Debe ser distinta de la lengua materna.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('necesidadEducativa')"
+          [class.form-field--hidden]="!esCampoVisible('necesidadEducativa')"
+          [attr.data-required]="esCampoObligatorio('necesidadEducativa')"
+        >
+          <label for="necesidadEducativa">Necesidad educativa <span>*</span></label>
+          <select id="necesidadEducativa" formControlName="necesidadEducativa">
+            <option *ngFor="let option of necesidadOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('necesidadEducativa', 'required')">Selecciona una opción del catálogo.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('tipoDiscapacidad')"
+          [class.form-field--hidden]="!esCampoVisible('tipoDiscapacidad')"
+          [attr.data-required]="esCampoObligatorio('tipoDiscapacidad')"
+        >
+          <label for="tipoDiscapacidad">Tipo de discapacidad <span>*</span></label>
+          <select id="tipoDiscapacidad" formControlName="tipoDiscapacidad">
+            <option *ngFor="let option of tipoDiscapacidadOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('tipoDiscapacidad', 'required')">Selecciona el tipo de discapacidad.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('aptitudSobresaliente')"
+          [class.form-field--hidden]="!esCampoVisible('aptitudSobresaliente')"
+          [attr.data-required]="esCampoObligatorio('aptitudSobresaliente')"
+        >
+          <label for="aptitudSobresaliente">Tipo de aptitud sobresaliente <span>*</span></label>
+          <select id="aptitudSobresaliente" formControlName="aptitudSobresaliente">
+            <option *ngFor="let option of aptitudSobresalienteOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('aptitudSobresaliente', 'required')">Selecciona el tipo de aptitud sobresaliente.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="inscripcion__section">
+      <h2>Identificadores y programa educativo</h2>
+      <div class="form-grid">
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('claveEscuela')"
+          [class.form-field--hidden]="!esCampoVisible('claveEscuela')"
+          [attr.data-required]="esCampoObligatorio('claveEscuela')"
+        >
+          <label for="claveEscuela">Clave de la escuela <span>*</span></label>
+          <select id="claveEscuela" formControlName="claveEscuela">
+            <option value="">Seleccione una opción</option>
+            <option *ngFor="let entry of cctCatalog" [value]="entry.cct">{{ entry.cct }}</option>
+          </select>
+          <small *ngIf="hasError('claveEscuela', 'required')">Selecciona la clave de la escuela.</small>
+          <small *ngIf="hasError('claveEscuela', 'pattern')">Debe capturarse un CCT de 10 caracteres válidos.</small>
+          <small *ngIf="hasError('claveEscuela', 'cctCatalog')">
+            Selecciona un CCT incluido en el catálogo oficial de planteles autorizado por la SEP.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('claveCarrera')"
+          [class.form-field--hidden]="!esCampoVisible('claveCarrera')"
+          [attr.data-required]="esCampoObligatorio('claveCarrera')"
+        >
+          <label for="claveCarrera">Clave de la carrera <span>*</span></label>
+          <input id="claveCarrera" type="text" formControlName="claveCarrera" />
+          <small *ngIf="hasError('claveCarrera', 'required')">
+            La clave de la carrera es obligatoria.
+          </small>
+          <small *ngIf="hasError('claveCarrera', 'pattern')">
+            Usa una clave alfanumérica válida.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('creditosTotales')"
+          [class.form-field--hidden]="!esCampoVisible('creditosTotales')"
+          [attr.data-required]="esCampoObligatorio('creditosTotales')"
+        >
+          <label for="creditosTotales">Créditos totales de la carrera <span>*</span></label>
+          <input
+            id="creditosTotales"
+            type="text"
+            formControlName="creditosTotales"
+            inputmode="numeric"
+            maxlength="3"
+          />
+          <small *ngIf="hasError('creditosTotales', 'required')">
+            Indica el total de créditos del plan de estudios.
+          </small>
+          <small *ngIf="hasError('creditosTotales', 'pattern')">
+            Ingresa un valor numérico de hasta tres dígitos.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('nivelEducativo')"
+          [class.form-field--hidden]="!esCampoVisible('nivelEducativo')"
+          [attr.data-required]="esCampoObligatorio('nivelEducativo')"
+        >
+          <label for="nivelEducativo">Nivel educativo <span>*</span></label>
+          <select id="nivelEducativo" formControlName="nivelEducativo">
+            <option *ngFor="let option of nivelEducativoOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('nivelEducativo', 'required')">Selecciona el nivel educativo.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('modalidadEducativa')"
+          [class.form-field--hidden]="!esCampoVisible('modalidadEducativa')"
+          [attr.data-required]="esCampoObligatorio('modalidadEducativa')"
+        >
+          <label for="modalidadEducativa">Modalidad educativa <span>*</span></label>
+          <select id="modalidadEducativa" formControlName="modalidadEducativa">
+            <option *ngFor="let option of modalidadOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('modalidadEducativa', 'required')">Selecciona la modalidad educativa.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('opcionEducativa')"
+          [class.form-field--hidden]="!esCampoVisible('opcionEducativa')"
+          [attr.data-required]="esCampoObligatorio('opcionEducativa')"
+        >
+          <label for="opcionEducativa">Opción educativa <span>*</span></label>
+          <select id="opcionEducativa" formControlName="opcionEducativa">
+            <option *ngFor="let option of opcionEducativaCatalog" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('opcionEducativa', 'required')">Selecciona la opción educativa.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('numeroAcuerdoRvoe')"
+          [class.form-field--hidden]="!esCampoVisible('numeroAcuerdoRvoe')"
+          [attr.data-required]="esCampoObligatorio('numeroAcuerdoRvoe')"
+        >
+          <label for="numeroAcuerdoRvoe">Número de acuerdo de RVOE <span>*</span></label>
+          <input id="numeroAcuerdoRvoe" type="text" formControlName="numeroAcuerdoRvoe" />
+          <small *ngIf="hasError('numeroAcuerdoRvoe', 'required')">
+            El número de acuerdo es obligatorio.
+          </small>
+          <small *ngIf="hasError('numeroAcuerdoRvoe', 'pattern')">
+            Usa el formato oficial del registro RVOE.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('fechaAcuerdoRvoe')"
+          [class.form-field--hidden]="!esCampoVisible('fechaAcuerdoRvoe')"
+          [attr.data-required]="esCampoObligatorio('fechaAcuerdoRvoe')"
+        >
+          <label for="fechaAcuerdoRvoe">Fecha de acuerdo de RVOE <span>*</span></label>
+          <input id="fechaAcuerdoRvoe" type="date" formControlName="fechaAcuerdoRvoe" />
+          <small *ngIf="hasError('fechaAcuerdoRvoe', 'required')">
+            La fecha del acuerdo es obligatoria.
+          </small>
+          <small *ngIf="hasError('fechaAcuerdoRvoe', 'dateFormat')">Selecciona una fecha válida.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('turno')"
+          [class.form-field--hidden]="!esCampoVisible('turno')"
+          [attr.data-required]="esCampoObligatorio('turno')"
+        >
+          <label for="turno">Turno <span>*</span></label>
+          <select id="turno" formControlName="turno">
+            <option *ngFor="let option of turnoOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('turno', 'required')">Selecciona el turno disponible.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="inscripcion__section">
+      <h2>Trayectoria académica</h2>
+      <div class="form-grid">
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('cicloInstitucional')"
+          [class.form-field--hidden]="!esCampoVisible('cicloInstitucional')"
+          [attr.data-required]="esCampoObligatorio('cicloInstitucional')"
+        >
+          <label for="cicloInstitucional">Ciclo institucional <span>*</span></label>
+          <input id="cicloInstitucional" type="text" formControlName="cicloInstitucional" placeholder="2025-1" />
+          <small *ngIf="hasError('cicloInstitucional', 'required')">El ciclo institucional es obligatorio.</small>
+          <small *ngIf="hasError('cicloInstitucional', 'pattern')">Usa el formato AAAA-N.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('gradoAvance')"
+          [class.form-field--hidden]="!esCampoVisible('gradoAvance')"
+          [attr.data-required]="esCampoObligatorio('gradoAvance')"
+        >
+          <label for="gradoAvance">Grado de avance que cursa el alumno del plan de estudios <span>*</span></label>
+          <select id="gradoAvance" formControlName="gradoAvance">
+            <option
+              *ngFor="let option of gradoAvanceOptions"
+              [ngValue]="option.value"
+              [disabled]="option.value === ''"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('gradoAvance', 'required')">El grado de avance es obligatorio.</small>
+          <small *ngIf="hasError('gradoAvance', 'pattern')">Selecciona un valor válido del catálogo.</small>
+          <small *ngIf="hasError('gradoAvance', 'flujoIncompatible')">
+            Cuando el flujo es Inscripción el grado debe ser 1 y cuando es Reinscripción debe ser mayor a 1.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('periodoModulo')"
+          [class.form-field--hidden]="!esCampoVisible('periodoModulo')"
+          [attr.data-required]="esCampoObligatorio('periodoModulo')"
+        >
+          <label for="periodoModulo">Periodo o módulo escolar estructura del plan de estudios <span>*</span></label>
+          <select id="periodoModulo" formControlName="periodoModulo">
+            <option
+              *ngFor="let option of periodoModuloOptions"
+              [ngValue]="option.value"
+              [disabled]="option.value === ''"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('periodoModulo', 'required')">El periodo es obligatorio.</small>
+          <small *ngIf="hasError('periodoModulo', 'pattern')">Selecciona un valor válido del catálogo.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('duracionPeriodo')"
+          [class.form-field--hidden]="!esCampoVisible('duracionPeriodo')"
+          [attr.data-required]="esCampoObligatorio('duracionPeriodo')"
+        >
+          <label for="duracionPeriodo">Duración del periodo o módulo escolar del plan de estudios <span>*</span></label>
+          <select id="duracionPeriodo" formControlName="duracionPeriodo">
+            <option
+              *ngFor="let option of duracionPeriodoOptions"
+              [ngValue]="option.value"
+              [disabled]="option.value === ''"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('duracionPeriodo', 'required')">La duración es obligatoria.</small>
+          <small *ngIf="hasError('duracionPeriodo', 'pattern')">Selecciona una opción válida del catálogo.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('fechaInicioPeriodo')"
+          [class.form-field--hidden]="!esCampoVisible('fechaInicioPeriodo')"
+          [attr.data-required]="esCampoObligatorio('fechaInicioPeriodo')"
+        >
+          <label for="fechaInicioPeriodo">Fecha de inicio del periodo o módulo escolar reportado <span>*</span></label>
+          <input
+            id="fechaInicioPeriodo"
+            type="date"
+            formControlName="fechaInicioPeriodo"
+            [attr.max]="todayIsoString"
+          />
+          <small *ngIf="hasError('fechaInicioPeriodo', 'required')">La fecha de inicio del periodo es obligatoria.</small>
+          <small *ngIf="hasError('fechaInicioPeriodo', 'dateFormat')">Selecciona una fecha válida.</small>
+          <small *ngIf="hasError('fechaInicioPeriodo', 'futureDate')">La fecha no puede ser futura.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('antecedenteAcademico')"
+          [class.form-field--hidden]="!esCampoVisible('antecedenteAcademico')"
+          [attr.data-required]="esCampoObligatorio('antecedenteAcademico')"
+        >
+          <label for="antecedenteAcademico">Antecedente académico <span>*</span></label>
+          <select id="antecedenteAcademico" formControlName="antecedenteAcademico">
+            <option *ngFor="let option of antecedenteOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('antecedenteAcademico', 'required')">Selecciona si cuenta con antecedente.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('numeroMatricula')"
+          [class.form-field--hidden]="!esCampoVisible('numeroMatricula')"
+          [attr.data-required]="esCampoObligatorio('numeroMatricula')"
+        >
+          <label for="numeroMatricula">Número de matrícula institucional o de control escolar del alumno <span>*</span></label>
+          <input id="numeroMatricula" type="text" formControlName="numeroMatricula" />
+          <small *ngIf="hasError('numeroMatricula', 'required')">La matrícula institucional es obligatoria.</small>
+          <small *ngIf="hasError('numeroMatricula', 'pattern')">Utiliza entre cinco y veinte caracteres alfanuméricos.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('situacionAcademica')"
+          [class.form-field--hidden]="!esCampoVisible('situacionAcademica')"
+          [attr.data-required]="esCampoObligatorio('situacionAcademica')"
+        >
+          <label for="situacionAcademica">Situación académica <span>*</span></label>
+          <select id="situacionAcademica" formControlName="situacionAcademica">
+            <option *ngFor="let option of situacionAcademicaOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('situacionAcademica', 'required')">
+            Selecciona la situación académica vigente.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('fechaInicioEstudios')"
+          [class.form-field--hidden]="!esCampoVisible('fechaInicioEstudios')"
+          [attr.data-required]="esCampoObligatorio('fechaInicioEstudios')"
+        >
+          <label for="fechaInicioEstudios">Fecha de inicio de estudios a primer ingreso de educación superior <span>*</span></label>
+          <input
+            id="fechaInicioEstudios"
+            type="date"
+            formControlName="fechaInicioEstudios"
+            [attr.max]="todayIsoString"
+          />
+          <small *ngIf="hasError('fechaInicioEstudios', 'required')">La fecha de inicio es obligatoria.</small>
+          <small *ngIf="hasError('fechaInicioEstudios', 'dateFormat')">Selecciona una fecha válida.</small>
+          <small *ngIf="hasError('fechaInicioEstudios', 'futureDate')">No puede ser una fecha futura.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('origenEstudios')"
+          [class.form-field--hidden]="!esCampoVisible('origenEstudios')"
+          [attr.data-required]="esCampoObligatorio('origenEstudios')"
+        >
+          <label for="origenEstudios">Origen de estudios precedentes <span>*</span></label>
+          <select id="origenEstudios" formControlName="origenEstudios">
+            <option *ngFor="let option of origenEstudiosOptions" [ngValue]="option.value" [disabled]="option.value === ''">
+              {{ option.label }}
+            </option>
+          </select>
+          <small *ngIf="hasError('origenEstudios', 'required')">
+            Selecciona el origen de los estudios precedentes.
+          </small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('tipoBaja')"
+          [class.form-field--hidden]="!esCampoVisible('tipoBaja')"
+          [attr.data-required]="esCampoObligatorio('tipoBaja')"
+        >
+          <label for="tipoBaja">Tipo de baja del servicio educativo</label>
+          <select id="tipoBaja" formControlName="tipoBaja">
+            <option value="">Seleccione una opción</option>
+            <option *ngFor="let option of tipoBajaOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+          <small *ngIf="hasError('tipoBaja', 'required')">Selecciona el tipo de baja cuando el flujo sea Baja.</small>
+        </div>
+
+        <div
+          class="form-field"
+          [class.form-field--invalid]="isInvalid('motivoBaja')"
+          [class.form-field--hidden]="!esCampoVisible('motivoBaja')"
+          [attr.data-required]="esCampoObligatorio('motivoBaja')"
+        >
+          <label for="motivoBaja">Motivo de baja</label>
+          <select id="motivoBaja" formControlName="motivoBaja">
+            <option value="">Seleccione una opción</option>
+            <option *ngFor="let option of motivoBajaOptions" [value]="option.value">{{ option.label }}</option>
+          </select>
+          <small *ngIf="hasError('motivoBaja', 'required')">Selecciona un motivo válido cuando corresponda.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-message form-message--error" *ngIf="inscripcionForm.hasError('segmentoCurpMismatch')">
+      El segmento raíz debe coincidir con los primeros 16 caracteres de la CURP.
+    </div>
+
+    <div class="form-message form-message--success" *ngIf="submissionSuccess()">
+      {{ mensajeExitoAlmacenamiento }}
+    </div>
+
+    <div class="form-actions">
+      <button type="submit">Guardar {{ textoAccion }}</button>
+    </div>
+  </form>
+
+  <p class="mensaje" *ngIf="!modoEdicion && mensajeGuardado">{{ mensajeGuardado }}</p>
+
+  <section
+    class="inscripciones-guardadas-panel"
+    *ngIf="!modoEdicion && registrosGuardados.length > 0"
+  >
+    <div class="inscripciones-guardadas-header">
+      <h2>{{ textoAccionPluralCapitalizada }} guardadas</h2>
+      <p>Consulta los registros capturados recientemente.</p>
+    </div>
+
+    <div class="tabla-inscripciones">
+      <table class="inscripciones-guardadas">
+        <thead>
+          <tr>
+            <th>Flujo</th>
+            <th>Ciclo escolar</th>
+            <th>Nombre completo</th>
+            <th>CURP</th>
+            <th class="acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let registro of registrosGuardados; let i = index">
+            <td data-label="Flujo">{{ registro.flujo }}</td>
+            <td data-label="Ciclo escolar">{{ registro.cicloEscolar }}</td>
+            <td data-label="Nombre completo">{{ registro.nombreCompleto || 'N/D' }}</td>
+            <td data-label="CURP">{{ registro.curp || 'N/A' }}</td>
+            <td class="acciones" data-label="Acciones">
+              <div class="acciones-botones" role="group" aria-label="Acciones disponibles">
+                <button
+                  type="button"
+                  class="icono-accion"
+                  [attr.aria-label]="'Editar ' + textoAccion"
+                  [attr.title]="'Editar ' + textoAccion"
+                  (click)="editarRegistro(i)"
+                >
+                  ✏️
+                </button>
+                <button
+                  type="button"
+                  class="icono-accion"
+                  [attr.aria-label]="'Eliminar ' + textoAccion"
+                  [attr.title]="'Eliminar ' + textoAccion"
+                  (click)="eliminarRegistro(i)"
+                >
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

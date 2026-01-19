@@ -1,0 +1,44 @@
+"""
+Defines the GraphQL schema for the SEP-MUSES project.
+This schema is the contract for all API interactions.
+"""
+
+type Query {
+  "Retrieves a student's academic history by their CURP"
+  studentHistory(curp: String!): Student
+}
+
+type Mutation {
+  "Registers a new student enrollment"
+  enrollStudent(enrollment: EnrollmentInput!): EnrollmentResponse
+}
+
+"Represents a student in the system"
+type Student {
+  curp: String!
+  name: String!
+  enrollments: [Enrollment]
+}
+
+"Represents a single enrollment record"
+type Enrollment {
+  id: ID!
+  student: Student!
+  cct: String!
+  program: String!
+  status: String!
+}
+
+"Input for enrolling a student"
+input EnrollmentInput {
+  studentCurp: String!
+  cct: String!
+  program: String!
+}
+
+"Response from an enrollment mutation"
+type EnrollmentResponse {
+  success: Boolean!
+  message: String
+  enrollment: Enrollment
+}

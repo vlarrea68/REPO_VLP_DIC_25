@@ -1,0 +1,99 @@
+<section class="configuracion">
+  <header class="configuracion__header">
+    <h1>Gestión de campos por institución</h1>
+    <p>
+      Activa, oculta o personaliza los campos del formulario de inscripción según las políticas de
+      cada institución mientras se integra el backend definitivo.
+    </p>
+  </header>
+
+  <div class="configuracion__layout">
+    <aside class="configuracion__instituciones">
+      <h2>Instituciones</h2>
+      <p *ngIf="institucionesCargando">Cargando instituciones…</p>
+      <ul *ngIf="!institucionesCargando">
+        <li *ngFor="let institucion of instituciones">
+          <button
+            type="button"
+            class="configuracion__institucion"
+            [class.configuracion__institucion--activa]="institucion.clave === seleccionActual"
+            (click)="seleccionarInstitucion(institucion.clave)"
+          >
+            <span class="configuracion__institucion-clave">{{ institucion.clave }}</span>
+            <span class="configuracion__institucion-nombre">{{ institucion.nombre }}</span>
+          </button>
+        </li>
+      </ul>
+    </aside>
+
+    <section class="configuracion__detalle">
+      <div *ngIf="configuracionCargando" class="configuracion__cargando">
+        Cargando configuración seleccionada…
+      </div>
+
+      <div *ngIf="mensajeError" class="configuracion__mensaje configuracion__mensaje--error">
+        {{ mensajeError }}
+      </div>
+      <div *ngIf="mensajeGuardado" class="configuracion__mensaje configuracion__mensaje--exito">
+        {{ mensajeGuardado }}
+      </div>
+
+      <form
+        *ngIf="!configuracionCargando && seleccionActual"
+        [formGroup]="configuracionForm"
+        (ngSubmit)="guardarCambios()"
+        novalidate
+      >
+        <div class="configuracion__descripcion">
+          <label for="descripcion">Descripción interna</label>
+          <textarea
+            id="descripcion"
+            formControlName="descripcion"
+            rows="3"
+            placeholder="Resumen visible para el personal que administra las variantes."
+          ></textarea>
+        </div>
+
+        <div class="configuracion__campos" formGroupName="campos">
+          <article
+            *ngFor="let campo of camposAdministrables"
+            class="configuracion__campo"
+            [formGroupName]="campo.clave"
+          >
+            <header class="configuracion__campo-header">
+              <h3>{{ campo.etiqueta }}</h3>
+              <p *ngIf="campo.descripcion">{{ campo.descripcion }}</p>
+            </header>
+
+            <div class="configuracion__campo-opciones">
+              <label>
+                <input type="checkbox" formControlName="visible" /> Campo visible en la inscripción
+              </label>
+              <label>
+                <input type="checkbox" formControlName="obligatorio" /> Campo obligatorio
+              </label>
+            </div>
+
+            <label class="configuracion__campo-etiqueta">
+              Etiqueta personalizada
+              <input
+                type="text"
+                formControlName="etiqueta"
+                placeholder="Usar etiqueta por defecto"
+              />
+            </label>
+          </article>
+        </div>
+
+        <div class="configuracion__acciones">
+          <button type="button" (click)="restablecerCambios()" [disabled]="guardando">
+            Descartar cambios
+          </button>
+          <button type="submit" class="primario" [disabled]="guardando">
+            {{ guardando ? 'Guardando…' : 'Guardar configuración' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+</section>
