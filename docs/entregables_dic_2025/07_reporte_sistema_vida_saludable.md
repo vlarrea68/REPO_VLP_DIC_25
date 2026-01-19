@@ -1,118 +1,178 @@
 # Entregable 7. Reporte Técnico del Sistema Vida Saludable (Ciclo 2)
 
-Este reporte consolida toda la información disponible en el directorio **vida-saludable** para cerrar la entrega mensual de diciembre de 2025. Se profundiza en arquitectura, operación, gobernanza, herramientas de análisis y riesgos, tomando como fuente los artefactos funcionales y documentales que ya están versionados en el repositorio.
+Este reporte consolida la evidencia técnica disponible en el directorio **vida-saludable** para cerrar la entrega de diciembre de 2025. Se amplía la documentación con los insumos de [vida-saludable/docs](vida-saludable/docs), cubriendo visión de producto, arquitectura, casos de uso, modelos de datos, riesgos, métricas y backlog operativo.
 
 ## 1. Propósito y Alcance
-- Documentar la solución de carga de tamizajes escolares ciclo 2, alineada a los entregables RUP vigentes.
-- Describir la operación end-to-end (preparación de CSV, validación, inserción en PostgreSQL y verificación posterior).
-- Inventariar scripts auxiliares, documentación funcional y evidencia de ejecución.
-- Identificar riesgos, métricas y backlog inmediato para el siguiente ciclo.
+- Documentar la solución de carga de tamizajes escolares ciclo 2 alineada al Plan Maestro RUP v1.1.
+- Describir la operación end-to-end (preparación de CSV, validación, inserción en PostgreSQL y verificación).
+- Inventariar scripts auxiliares, evidencias, configuraciones y documentación formal.
+- Integrar riesgos, métricas, KPIs y plan de trabajo inmediato.
 
 ## 2. Inventario Detallado del Repositorio
 | Categoría | Contenido | Referencia |
 |-----------|-----------|------------|
-| Documentación RUP | Plan Maestro, Arquitectura, Visión, Stakeholders, Modelo de Datos, Casos de Uso, Análisis de Riesgos y Tareas de Implementación. | [vida-saludable/docs](vida-saludable/docs) |
-| Código principal | Loader validado `load_tamizajes.py`, dependencias definidas y scripts CLI. | [vida-saludable/load_tamizajes.py](vida-saludable/load_tamizajes.py) |
-| Scripts de soporte | 25 utilidades (COPY masivo, verificaciones post-carga, análisis de catálogos, fixes de markdown, estadísticas, truncados, etc.). | [vida-saludable/scripts](vida-saludable/scripts) |
-| Esquemas y DDL | Definiciones SQL para `tamizados_con_sin_reporte_c2`, `menor_evaluado` y scripts de alteraciones. | [vida-saludable/db](vida-saludable/db) |
-| Datos / logs de ejemplo | CSV de prueba, salidas de ejecución (`salida*.txt`), reportes en `logs/` y `reportes/`. | [vida-saludable/data](vida-saludable/data), [vida-saludable/logs](vida-saludable/logs), [vida-saludable/reportes](vida-saludable/reportes) |
-| Configuración | Plantillas `.env`, requerimientos de Python y ajustes de VS Code. | [vida-saludable/.env.sample](vida-saludable/.env.sample), [vida-saludable/requirements.txt](vida-saludable/requirements.txt), [vida-saludable/.vscode](vida-saludable/.vscode) |
+| Plan Maestro y anexos | Cronograma, métricas, herramientas y lineamientos RUP. | [vida-saludable/docs/00_PLAN_MAESTRO_RUP.md](vida-saludable/docs/00_PLAN_MAESTRO_RUP.md) |
+| Visión y alcance | Objetivos, beneficios, criterios de éxito y límites. | [vida-saludable/docs/01_VISION.md](vida-saludable/docs/01_VISION.md) |
+| Arquitectura y diagramas | Vistas lógicas, manejo de errores, despliegue y procesos. | [vida-saludable/docs/01_ARQUITECTURA_SOFTWARE.md](vida-saludable/docs/01_ARQUITECTURA_SOFTWARE.md) |
+| Modelo de datos | ERD, DDL, diccionario y reglas de integridad. | [vida-saludable/docs/02_MODELO_DATOS.md](vida-saludable/docs/02_MODELO_DATOS.md) |
+| Stakeholders | Roles, matriz RACI y responsables. | [vida-saludable/docs/02_STAKEHOLDERS.md](vida-saludable/docs/02_STAKEHOLDERS.md) |
+| Casos de uso | UC detallados, escenarios de prueba y reglas. | [vida-saludable/docs/03_CASOS_USO.md](vida-saludable/docs/03_CASOS_USO.md) |
+| Riesgos | Matriz extendida con mitigaciones y dueños. | [vida-saludable/docs/04_ANALISIS_RIESGOS.md](vida-saludable/docs/04_ANALISIS_RIESGOS.md) |
+| Plan de tareas | Lista secuencial para agente IA/Dev. | [vida-saludable/docs/04_TAREAS_IMPLEMENTACION.md](vida-saludable/docs/04_TAREAS_IMPLEMENTACION.md) |
+| Código operativo | Loader validado y scripts de soporte CLI. | [vida-saludable/load_tamizajes.py](vida-saludable/load_tamizajes.py), [vida-saludable/scripts](vida-saludable/scripts) |
+| Datos, DDL y evidencias | CSV de ejemplo, salidas, logs y SQL. | [vida-saludable/data](vida-saludable/data), [vida-saludable/db](vida-saludable/db), [vida-saludable/logs](vida-saludable/logs) |
 
-## 3. Contexto del Plan Maestro (docs/00_PLAN_MAESTRO_RUP.md)
-- **Metodología:** RUP versión 1.1 enfocada en un MVP de ejecución puntual ya entregado.
-- **Alcance incluido:** script `load_tamizajes.py`, documentación técnica básica, DDL y guías operativas.
-- **Fuera de alcance inmediato:** modularización avanzada, logging estructurado persistente, CI/CD y UI.
-- **Criterios de aceptación:** corrida exitosa en entorno controlado, coincidencia de conteos, ausencia de datos sensibles y reporte final archivado.
-- **Backlog:** separación por módulos (`config.py`, `validators.py`, `db.py`), flags no interactivos, tabla de auditoría, pruebas automatizadas y pipelines de calidad.
+## 3. Evidencias de Datos, Esquemas y Reportes
+- **Datasets sanitizados:** el directorio [vida-saludable/data](vida-saludable/data) conserva archivos curados por ciclo (`clean_CICLO_1.csv`, `clean_CICLO_2.csv`, `filtered_CICLO_1.csv`) más un `data.example.csv` con los encabezados oficiales `CVE_CURP`, `CVE_ESCUELA`, `ID_TURNO`, `REF_TELEFONO`, `REF_CORREO_RESPONSABLE`, `ID_CICLO_ESCOLAR`, `ESTATUS_REPORTE`. Ejemplos en [vida-saludable/data/data.example.csv](vida-saludable/data/data.example.csv) muestran registros sin datos sensibles y permiten validar la CLI en modo `dry-run` antes de apuntar a archivos masivos.
+- **Esquemas físicos:** además del DDL genérico `ddl_tamizados.sql`, el archivo [vida-saludable/db/ddl_menor_evaluado.sql](vida-saludable/db/ddl_menor_evaluado.sql) fija la PK compuesta `cve_curp + cve_escuela + id_ciclo_escolar` y exige `id_turno` y `id_ciclo_escolar` como NOT NULL; esto confirma que las migraciones recientes mantienen granularidad por ciclo aun cuando el loader tolere CSV mínimos.
+- **Reportes comparativos:** [vida-saludable/reportes/comparison_summary.md](vida-saludable/reportes/comparison_summary.md) documenta la reconciliación `tamizados_con_sin_reporte` vs `tamizados_con_sin_reporte_c2` con 3.90M vs 3.77M CURP, intersección de 3.76M (overlap 96.36% contra A y 99.76% contra B) y diferencias materializadas en `a_not_b_full.csv` / `b_not_a_full.csv`.
+- **Métricas y conteos tabulares:** [vida-saludable/reportes/totales.csv](vida-saludable/reportes/totales.csv) resume los registros por tabla (3,900,159 en `tamizados_con_sin_reporte`, 3,767,575 en `tamizados_con_sin_reporte_c2`), mientras [vida-saludable/reportes/comparison_metrics.csv](vida-saludable/reportes/comparison_metrics.csv) captura las cifras de intersección, diferencias y duplicados (0 en ambos casos), sirviendo como insumo directo para reconciliaciones automáticas.
 
-## 4. Flujo Operativo End-to-End
-1. **Preparación del entorno**
-  - Clonar repositorio, crear venv y cargar dependencias (`pandas`, `psycopg2-binary`, `python-dotenv`, toolchain de QA).
-  - Configurar `.env` a partir de `.env.sample`, declarando credenciales PostgreSQL, `BATCH_SIZE`, `DUPLICATE_MODE` y parámetros opcionales.
-2. **Ingesta controlada** (loader validado)
-  - Ejecución `python load_tamizajes.py data/archivo.csv --delimiter '^' --target-table menor_evaluado`.
-  - Lectura adaptativa de CSV: detección de delimitador, normalización de encabezados y completado de columnas faltantes con `NULL` para el modo mínimo.
-  - Validaciones: CURP (regex con entidad + fecha), correo, teléfono, turno, estatus y campos obligatorios condicionados al target.
-  - Batch insert configurable (`execute_batch`, tamaño 1000 por defecto). Commit único con rollback ante errores de `psycopg2`.
-3. **Ingesta sin validaciones** (modo DBA)
-  - `scripts/load_raw_no_validation.py` habilita COPY FROM STDIN, detección automática de delimitador y columnas, y selección de tabla destino según cabecera.
-4. **Post-operación**
-  - `scripts/post_load_check.py` compara CURPs del CSV contra la tabla destino y escribe evidencias en `logs/post_load_check.txt`.
-  - Scripts analíticos (`generate_statistics.py`, `db_counts.py`, `analisis_estados_por_ciclo.py`) generan métricas de completitud y distribución para cierre del ciclo.
+  **Resumen de totales (extracto del CSV):**
+  | Tabla | Total de registros |
+  |-------|--------------------|
+  | `tamizados_con_sin_reporte_c2` | 3,767,575 |
+  | `tamizados_con_sin_reporte` | 3,900,159 |
 
-## 5. Arquitectura Lógica y Componentes
-- **CLI Monolítica:** `load_tamizajes.py` concentra parsers, validadores y conexión DB, pero mantiene secciones claras para evolucionar hacia módulos separados.
-- **Configuración externalizada:** Uso de `dotenv` y `.env.sample` garantiza que no existan credenciales en el código.
-- **Persistencia:** PostgreSQL 14 con tablas `tamizados_con_sin_reporte_c2` (PK `cve_curp`) y `menor_evaluado` (PK compuesta, versión extendida). DDL base en [vida-saludable/db/ddl_tamizados.sql](vida-saludable/db/ddl_tamizados.sql).
-- **Procesamiento:** Pandas maneja la lectura/normalización, mientras `psycopg2.extras.execute_batch` ejecuta inserciones en lotes con control transaccional.
-- **Observabilidad mínima:** Reporte resumen en consola (conteos, tasa de éxito, velocidad) y archivos de salida manuales.
+  **Métricas de comparación (extracto del CSV):**
+  | Métrica | Valor |
+  |---------|-------|
+  | Total A (`tamizados_con_sin_reporte`) | 3,900,159 |
+  | Total B (`tamizados_con_sin_reporte_c2`) | 3,767,575 |
+  | Distinct A | 3,900,159 |
+  | Distinct B | 3,767,575 |
+  | Intersección | 3,758,384 |
+  | A \ B | 141,775 |
+  | B \ A | 9,191 |
+  | Duplicados en A | 0 |
+  | Duplicados en B | 0 |
+- **Estadísticas operativas:** los reportes `estadisticas_basicas.txt`, `estadisticas_utf8.txt` y `estados_por_ciclo.txt` en [vida-saludable/reportes](vida-saludable/reportes) se derivan de `scripts/stats_rapido.py` y cuantifican 6,295,949 registros totales (63% ciclo 1, 37% ciclo 2), distribución por turnos (84% matutino), estatus (73% con descarga), top escuelas y cobertura de datos de contacto (>99.9%). El análisis por entidad destaca concentraciones en Estado de México, Veracruz, Chiapas y Puebla para ambos ciclos.
+- **Monitoreo puntual:** scripts como [vida-saludable/scripts/db_counts.py](vida-saludable/scripts/db_counts.py) y [vida-saludable/scripts/copy_csv_to_table.py](vida-saludable/scripts/copy_csv_to_table.py) facilitan validaciones rápidas (conteos, COPY controlado con delimitador configurable), mientras [vida-saludable/scripts/stats_rapido.py](vida-saludable/scripts/stats_rapido.py) genera versiones reproducibles de los reportes anteriores.
 
-## 6. Configuración y Parámetros Operativos
-- Argumentos clave del loader: `--dry-run`, `--yes`, `--no-utf-icons`, `--delimiter`, `--target-table`, `--no-validate`.
-- Iconografía configurable (ASCII vs UTF-8) para soportar consolas Windows (`--no-utf-icons`).
-- Detección automática de delimitador y fallback a `,`, `|`, `;`, `\t` o `^`.
-- Modo `--no-validate`: limpia y normaliza campos sin ejecutar validadores, útil para cargas controladas en ambientes confiables.
-- Selección de tabla: `menor_evaluado` (default) exige `cve_escuela`, `id_turno`, `id_ciclo_escolar`; `tamizados_con_sin_reporte_c2` opera con columnas mínimas.
+## 4. Contexto del Plan Maestro
+- **Versión y fecha:** 1.1, 6 de noviembre de 2025, enfocada a un MVP de ejecución única. Se registran cambios respecto a la v1.0 para reconocer el script ya operativo y ajustar objetivos cortos.
+- **Estado:** “Planificación / MVP entregado”. El objetivo inmediato es formalizar documentación, asegurar operación trazable y dejar backlog claro para evoluciones futuras.
+- **Entregables vigentes:** `load_tamizajes.py`, documentación técnica (arquitectura, modelo, casos de uso, riesgos), `README.md`, `requirements.txt`, `db/ddl_tamizados.sql` y evidencias de ejecución.
+- **Criterios de aceptación iniciales:** corrida exitosa en entorno de pruebas, coincidencia de registros insertados vs válidos, ausencia de datos sensibles y reporte final archivado.
+- **Backlog estratégico:** modularizar el loader, habilitar flags no interactivos (`--dry-run`, `--yes`), logging estructurado, tabla de auditoría y pruebas unitarias/integración.
 
-## 7. Modelo de Datos y Esquemas
-- **`tamizados_con_sin_reporte_c2`:** PK en `cve_curp`, columnas opcionales para escuela, turno, correo, teléfono y estatus. DDL en [vida-saludable/db/ddl_tamizados.sql](vida-saludable/db/ddl_tamizados.sql).
-- **`menor_evaluado`:** versión extendida con PK compuesta y campos obligatorios adicionales (ciclo escolar). La documentación en [vida-saludable/docs/02_MODELO_DATOS.md](vida-saludable/docs/02_MODELO_DATOS.md) incluye ERD, diccionario y reglas de validación.
-- **Validaciones de negocio:** Regex CURP con entidades federativas válidas, catálogo de turnos (`1`-`5`), estatus (`REPORTE DESCARGADO`, `SIN REPORTE`) y límites de longitud para datos de contacto.
-- **Índices:** se recomienda mantener índices por escuela y estatus para acelerar conciliaciones y monitoreo.
+## 5. Visión y Beneficios del Producto
+- **Propósito del sistema:** automatizar la ingestión de tamizajes mediante una CLI que reduce tiempos operativos, minimiza errores y garantiza trazabilidad, según [vida-saludable/docs/01_VISION.md](vida-saludable/docs/01_VISION.md).
+- **Alcance incluido:** lectura/validación de CSV, inserción transaccional en PostgreSQL 14, gestión de credenciales vía `.env`, logging y pruebas básicas.
+- **Fuera de alcance inicial:** GUI, API pública y reportes visuales avanzados (planeados para iteraciones posteriores).
+- **Beneficios clave:** reducción de esfuerzo manual, validación previa del 100% de registros, cumplimiento de políticas de seguridad y generación de evidencia de carga.
+- **Criterios de éxito:** soportar hasta 100k registros en <5 minutos, cobertura de pruebas ≥ 80% para código crítico y cero datos sensibles en el repositorio.
 
-## 8. Scripts de Soporte Destacados
+## 6. Flujo Operativo End-to-End
+1. **Preparar entorno**: clonar repo, crear `venv`, instalar `requirements.txt`, copiar `.env.sample` a `.env` y llenar credenciales (ver instrucciones de README y tareas 1.1–1.4 del plan).
+2. **Ejecución estándar**: `python load_tamizajes.py data/archivo.csv --delimiter '^' --target-table menor_evaluado`.
+3. **Lectura y saneamiento**: detección automática de delimitador, estandarización de encabezados y relleno de columnas faltantes con `NULL` cuando se usa el modo mínimo.
+4. **Validaciones**: estructura (columnas mínimas), CURP, correo, teléfono, turnos y estatus por fila. Se registra cada fallo con detalle.
+5. **Inserción**: lotes configurables (BATCH_SIZE, default 1000) mediante `psycopg2.extras.execute_batch`, con transacciones y rollback en caso de error.
+6. **Post-operación**: ejecución opcional de `scripts/post_load_check.py` para reconciliar CURPs, generación de estadísticas con `scripts/generate_statistics.py` y resguardo de `logs/` y `salida_*.txt`.
+7. **Modo alterno**: `scripts/load_raw_no_validation.py` habilita COPY FROM STDIN para cargas DBA sin validaciones (requiere respaldo y documentación adicional).
+
+## 7. Arquitectura y Componentes
+- **CLI monolítica documentada**: [vida-saludable/docs/01_ARQUITECTURA_SOFTWARE.md](vida-saludable/docs/01_ARQUITECTURA_SOFTWARE.md) detalla vistas lógicas, diagramas de flujo y manejo de errores (incluye tablas ASCII para estrategias de retry y despliegue en entornos Python + PostgreSQL).
+- **Principios arquitectónicos**: simplicidad, seguridad (sin credenciales en código), confiabilidad (transacciones con rollback), rendimiento (batch insert/COPY) y observabilidad mínima (reportes en consola + logs).
+- **Despliegue**: CLI ejecutada en entorno Python 3.10+ con dependencias mínimas (`pandas`, `psycopg2-binary`, `python-dotenv`). DB objetivo: PostgreSQL 14, puerto 5432.
+- **Futuras separaciones**: plan para extraer `config.py`, `validators.py`, `db.py` y `cli.py` conforme crezca la complejidad.
+
+## 8. Configuración y Parámetros Operativos
+- **Variables de entorno** (plantilla en `.env.sample`): host, puerto, DB, usuario, contraseña, `BATCH_SIZE`, `DUPLICATE_MODE`, `MAX_INVALID_PERCENTAGE`, `DB_CONNECTION_TIMEOUT`.
+- **Flags CLI clave**: `--dry-run`, `--yes`, `--no-utf-icons`, `--delimiter`, `--target-table`, `--no-validate`.
+- **Delimitadores soportados**: autodetección entre `,`, `|`, `;`, `\t`, `^`; default caret.
+- **Modos de validación**: estándar (valida todo), `--no-validate` (solo normaliza), `--dry-run` (no escribe en BD), `DUPLICATE_MODE` (`skip` o `fail`).
+- **Estrategia de interacción**: confirmaciones interactivas cuando el error rate supera `MAX_INVALID_PERCENTAGE` (default 10%).
+
+## 9. Modelo de Datos y Esquemas
+- **Estructura física**: tablas `tamizados_con_sin_reporte_c2` (PK `cve_curp`, columnas opcionales) y `menor_evaluado` (PK compuesta `cve_curp + cve_escuela`, turno y ciclo obligatorios) descritas en [vida-saludable/docs/02_MODELO_DATOS.md](vida-saludable/docs/02_MODELO_DATOS.md).
+- **DDL**: [vida-saludable/db/ddl_tamizados.sql](vida-saludable/db/ddl_tamizados.sql) incluye constraints (regex de CURP, emails válidos, turnos `1-5`, estatus permitidos) e índices (`idx_tamizados_escuela`, `idx_tamizados_estatus`, índices compuestos por escuela/estatus).
+- **Diccionario de datos**: detalla tipo, longitud, obligatoriedad, ejemplos y reglas por columna (CURP en mayúsculas, normalización de correos, tolerancia para teléfonos con separadores, estatus `REPORTE DESCARGADO` / `SIN REPORTE`).
+- **Soporte a CSV mínimos**: loader acepta archivos con `CVE_CURP`, `REF_CORREO_RESPONSABLE`, `REF_TELEFONO` y completa el resto con `NULL`, gracias a que el modelo actual flexibiliza la PK.
+
+## 10. Stakeholders y Gobernanza
+- **Roles principales** (ver [vida-saludable/docs/02_STAKEHOLDERS.md](vida-saludable/docs/02_STAKEHOLDERS.md)):
+  - Product Owner (prioriza y acepta). Implicación alta.
+  - Equipo de Salud/Operadores (suministran CSV, validan resultados). Implicación media.
+  - Arquitecto/Desarrollador Python (diseño y mantenimiento). Implicación alta.
+  - DBA (ejecuta DDL, vigila integridad). Implicación media-alta.
+  - QA/Testers (casos de prueba, defectos). Implicación alta en construcción.
+  - DevOps (entornos, CI/CD). Implicación media.
+  - Seguridad/Compliance (revisión de controles). Implicación media.
+- **Interesados secundarios**: administradores de sistemas y usuarios institucionales que recibirán reportes derivados.
+- **Matriz RACI**: PO y Desarrollador comparten responsabilidades (R/A); DBA, QA y Seguridad actúan como consultores; DevOps informado y de apoyo.
+
+## 11. Casos de Uso y Escenarios de Prueba
+- **Casos principales**: UC-01 carga CSV, UC-02 validación de estructura, UC-03 validación de registros, UC-04 inserción, UC-05 manejo de errores/rollback, UC-06 reporte de carga (ver [vida-saludable/docs/03_CASOS_USO.md](vida-saludable/docs/03_CASOS_USO.md)).
+- **Casos secundarios**: UC-07 configuración (.env), UC-08 consulta de logs.
+- **Flujos alternos relevantes**: errores por duplicado (`IntegrityError`), `CheckViolation`, reconexión ante `OperationalError`, timeouts y manejo de porcentajes de error.
+- **Escenarios de prueba recomendados**: carga exitosa, CSV sin columnas clave, registros parcialmente inválidos, duplicados, desconexión de BD durante carga (incluye criterios de aceptación y métricas esperadas en cada escenario).
+- **Trazabilidad**: matriz que vincula requisitos (REQ-001..008) con cada caso de uso.
+
+## 12. Scripts de Soporte Destacados
 | Script | Función principal |
 |--------|------------------|
-| [scripts/load_raw_no_validation.py](vida-saludable/scripts/load_raw_no_validation.py) | Inserción masiva vía COPY (sin validaciones) con detección automática de delimitador/columnas y conteo antes-después. |
-| [scripts/post_load_check.py](vida-saludable/scripts/post_load_check.py) | Verificación post-carga: valida conteo, presencia de CURPs y genera reporte en `logs/`. |
-| [scripts/generate_statistics.py](vida-saludable/scripts/generate_statistics.py) | Reporte estadístico (totales, distribución por ciclo/turno/estatus, top escuelas, calidad de contacto, duplicados, estados CURP). |
-| [scripts/check_table_pk.py](vida-saludable/scripts/check_table_pk.py) / [scripts/modify_pk_menor_evaluado.py](vida-saludable/scripts/modify_pk_menor_evaluado.py) | Diagnóstico y ajuste del PK para `menor_evaluado` cuando se requiere migrar desde `cve_curp + cve_escuela`. |
-| [scripts/filter_wellformed_csv.py](vida-saludable/scripts/filter_wellformed_csv.py) y [scripts/clean_csv_for_loader.py](vida-saludable/scripts/clean_csv_for_loader.py) | Limpieza previa de CSV: normalizan delimitadores, corrigen encabezados y filtran registros bien formados. |
-| [scripts/generate_full_comparison_reports.py](vida-saludable/scripts/generate_full_comparison_reports.py) | Compara padrones entre ciclos y genera reportes de diferencias en `reportes/`. |
+| [vida-saludable/scripts/load_raw_no_validation.py](vida-saludable/scripts/load_raw_no_validation.py) | Inserción masiva con COPY FROM STDIN, detección automática de delimitadores y selección de tabla según encabezado. |
+| [vida-saludable/scripts/post_load_check.py](vida-saludable/scripts/post_load_check.py) | Reconciliación post-carga: compara CURPs del CSV vs tabla y escribe evidencia en `logs/post_load_check.txt`. |
+| [vida-saludable/scripts/generate_statistics.py](vida-saludable/scripts/generate_statistics.py) | Genera métricas (totales, distribución por ciclo/turno/estatus, top escuelas, duplicados, calidad de contacto, estados CURP). |
+| [vida-saludable/scripts/check_table_pk.py](vida-saludable/scripts/check_table_pk.py) / [vida-saludable/scripts/modify_pk_menor_evaluado.py](vida-saludable/scripts/modify_pk_menor_evaluado.py) | Verifica y ajusta la PK de `menor_evaluado` durante migraciones. |
+| [vida-saludable/scripts/filter_wellformed_csv.py](vida-saludable/scripts/filter_wellformed_csv.py) & [vida-saludable/scripts/clean_csv_for_loader.py](vida-saludable/scripts/clean_csv_for_loader.py) | Limpian CSV antes de la carga (normalizan delimitadores, corrigen encabezados, filtran registros). |
+| [vida-saludable/scripts/generate_full_comparison_reports.py](vida-saludable/scripts/generate_full_comparison_reports.py) | Compara padrones entre ciclos y genera reportes de diferencias en `reportes/`. |
 
-## 9. Calidad de Datos y Validaciones
-- **Validación de estructura:** mínimo requerido (`cve_curp`, `ref_correo_responsable`, `ref_telefono`) y validaciones estrictas adicionales cuando el destino es `menor_evaluado`.
-- **Validación por fila:** `validar_fila()` centraliza reglas y devuelve mensajes detallados para bitácora, reduciendo el tiempo de diagnóstico.
-- **Tolerancia configurable:** si el porcentaje de errores supera 10% se solicita confirmación manual antes de continuar con los registros válidos.
-- **Soporte para `dry-run`:** permite medir calidad y tiempo sin tocar la base de datos; útil para escenarios UAT.
+## 13. Calidad de Datos y Validaciones
+- **Validación de estructura**: se exige el trío mínimo (`CVE_CURP`, `REF_CORREO_RESPONSABLE`, `REF_TELEFONO`). Para `menor_evaluado` se requieren además `CVE_ESCUELA`, `ID_TURNO`, `ID_CICLO_ESCOLAR`.
+- **Validación por fila**: `validar_fila()` devuelve mensajes detallados; los registros inválidos se agregan a un listado que alimenta reportes.
+- **Tolerancia configurable**: `MAX_INVALID_PERCENTAGE` controla si el sistema continúa con registros válidos o solicita confirmación.
+- **Modo dry-run**: cuantifica calidad y desempeño sin afectar la BD.
+- **Checks en BD**: constraints de formato (CURP, email, turno, estatus) garantizan integridad aun si se omiten validaciones en la CLI.
 
-## 10. Operación por Escenarios
+## 14. Operación por Escenarios
 | Escenario | Recomendación |
 |-----------|---------------|
-| **Carga estándar confiable** | Ejecutar `load_tamizajes.py` con validaciones activas y tabla `menor_evaluado`. Guarda reporte final y salida de consola. |
-| **Pruebas de conectividad o estructura** | Usar `--dry-run` + `--delimiter` para validar que el archivo es legible y que el pipeline funcionará cuando se habilite el commit. |
-| **Migraciones masivas** | Utilizar `load_raw_no_validation.py` (COPY). Previo a producción ejecutar backup y documentar conteos antes/después. |
-| **Reprocesos o limpieza** | Scripts como `truncate_menor.py` o `modify_pk_menor_evaluado.py` permiten resetear tablas o ajustar PK previo a reintentos, siempre bajo control del DBA. |
-| **Monitoreo posterior** | `post_load_check.py` y reportes en `reportes/` facilitan la emisión de actas de cierre para operadores y PO. |
+| **Carga confiable** | Ejecutar `load_tamizajes.py` con validaciones activas hacia `menor_evaluado`; conservar salida y logs. |
+| **Validación previa** | `--dry-run` + delimitador explícito para verificar columnas, tamaños y tiempos antes de producción. |
+| **Migración masiva (DBA)** | `load_raw_no_validation.py` + respaldo previo + conteos antes/después documentados. |
+| **Reprocesos / limpieza** | Scripts `truncate_menor.py`, `modify_pk_menor_evaluado.py` bajo supervisión DBA y bitácora formal. |
+| **Monitoreo post-carga** | `post_load_check.py`, reportes en `reportes/` y métricas de `generate_statistics.py` para actas de cierre. |
 
-## 11. Análisis y Reportes
-- `generate_statistics.py` brinda métricas clave (totales, top escuelas, duplicados, distribución de turnos/estatus y calidad de contacto) para respaldar decisiones de negocio y auditorías.
-- `analisis_estados_por_ciclo.py` y `analisis_avanzado.py` permiten filtrar padrones por entidad federativa o ciclo escolar y detectar outliers.
-- Los scripts `generate_comparison_reports.py` y `generate_full_comparison_reports.py` contrastan archivos de distintos ciclos, entregando CSV de diferencias y resúmenes listos para supervisión.
+## 15. Análisis y Reportes
+- `generate_statistics.py` se complementa con `db_counts.py`, `analisis_estados_por_ciclo.py`, `analisis_avanzado.py` para evaluar distribución geográfica, duplicados y calidad de contacto.
+- `generate_comparison_reports.py` / `generate_full_comparison_reports.py` proveen diferenciales entre ciclos, útiles para auditorías y conciliación.
+- Evidencias de ejecución (`salida_carga_ciclo2.txt`, archivos en `logs/` y `reportes/`) deben acompañar cada acta de carga.
 
-## 12. Riesgos y Controles
-| ID | Riesgo | Control actual | Mejora sugerida |
-|----|--------|----------------|-----------------|
-| R01 | Datos sensibles en repo | `.gitignore`, plantilla `.env.sample`, lineamientos en README. | Añadir secret-scanning automático en CI y revisión previa a merge. |
-| R03 | CSV mal formados | Validadores exhaustivos, scripts de limpieza y modo `dry-run`. | Publicar checklist para operadores + plantillas firmadas. |
-| R04 | Caídas de conexión | Manejo de excepciones `psycopg2`, rollback y reintentos manuales. | Implementar reintentos automáticos y checkpoints por lote. |
-| R05 | Rendimiento insuficiente | COPY masivo y batch size configurable. | Medir tiempos en archivos >100k registros y ajustar `BATCH_SIZE` dinámicamente. |
-| R06 | Duplicados o inconsistencias | PK en `cve_curp`, validaciones de CURP y scripts de comparación. | Tabla de auditoría y reportes automáticos de duplicados recientes. |
-| R09 | Vulnerabilidades en dependencias | `requirements.txt` versionado y sugerencia de `pip-audit`. | Automatizar escaneo semanal y alerts al PO. |
+## 16. Riesgos y Controles
+| ID | Riesgo | Probabilidad | Impacto | Control actual | Mejora sugerida |
+|----|--------|--------------|---------|----------------|-----------------|
+| R01 | Exposición de datos sensibles | Media | Crítico | `.gitignore`, `.env.sample`, lineamientos en README. | Secret scanning automático en CI y revisión previa a merge. |
+| R02 | Credenciales hardcodeadas | Baja | Alto | Uso de `python-dotenv`, revisión de PR. | Gestionar secretos en Vault/CI y rotar credenciales tras cada intervención. |
+| R03 | CSV mal formado | Alta | Medio | Validadores robustos, modo `dry-run`, plantillas. | Checklist operativo y plantillas firmadas por operadores. |
+| R04 | Caída de conexión | Media | Alto | Transacciones, rollback y reintentos manuales. | Reintentos automáticos por lote y checkpoints. |
+| R05 | Rendimiento insuficiente | Media | Medio | Batch configurable y scripts COPY. | Benchmarks >100k registros y ajuste dinámico de `BATCH_SIZE`. |
+| R06 | Duplicados | Media | Alto | PK, validaciones de CURP, scripts de comparación. | Tabla de auditoría y alertas automáticas de duplicados recientes. |
+| R07 | Pérdida de datos | Baja | Crítico | Respaldos previos y verificaciones post-carga. | Procedimientos documentados de restauración y pruebas rutinarias. |
+| R09 | Vulnerabilidades en dependencias | Baja | Alto | `requirements.txt` versionado, recomendación de `pip-audit`. | Escaneo semanal en CI y alertas al PO. |
 
-## 13. Backlog Inmediato (docs/04_TAREAS_IMPLEMENTACION.md)
-1. **Modularización del loader:** extraer `config`, `db`, `validators` y `cli` para facilitar pruebas unitarias.
-2. **Logging estructurado:** enviar salidas a JSON en `logs/` y/ó tabla `operaciones_carga` con timestamps, usuario y hash de archivo.
-3. **Pruebas automatizadas:** cubrir validadores (CURP, email, turnos) y flujos `dry-run`/`no-validate` con `pytest`.
-4. **CI liviano:** job que ejecute lint + pruebas sobre pull requests del subproyecto.
-5. **Reportería consolidada:** empaquetar métricas (`generate_statistics.py`) en dashboards y adjuntar a `reportes/` por corrida.
+## 17. Backlog Inmediato (Plan de Tareas)
+Referenciado en [vida-saludable/docs/04_TAREAS_IMPLEMENTACION.md](vida-saludable/docs/04_TAREAS_IMPLEMENTACION.md):
+1. **Configurar estructura y gobernanza**: carpetas mínimas (`db/`, `data/`, `tests/`, `docs/`), `.gitignore`, `.env.sample`, `requirements.txt`, README con guía paso a paso.
+2. **Modularización**: creación de `config.py`, `db.py`, `validators.py`, `cli.py` siguiendo los objetivos de la fase 2.
+3. **Validaciones y pruebas**: suites `pytest`, cobertura ≥ 80%, fixtures e integración con PostgreSQL (Docker opcional).
+4. **Calidad y CI**: agregar `black`, `flake8`, `pylint`, pipeline GitHub Actions que ejecute lint + pruebas.
+5. **Logging y auditoría**: logging estructurado (JSON) y tabla `operaciones_carga` con hash de archivo y timestamps.
 
-## 14. Recomendaciones Operativas
-1. Usar siempre archivos de prueba (`data/data.example.csv`) para validar las rutas antes de ejecutar datos reales.
-2. Conservar los archivos `salida*.txt` y `logs/post_load_check.txt` como evidencia de cada corrida.
-3. Documentar en `reportes/` los conteos previos/posteriores cuando se utilice el modo COPY o scripts de truncado.
-4. Blindar el `.env` con permisos mínimos y almacenar las credenciales definitivas en Vault / gestor institucional.
-5. Planificar revisiones quincenales del backlog para mantener priorizadas las mejoras de seguridad y automatización.
+## 18. Métricas, KPIs y Herramientas
+- **Calidad de código**: cobertura ≥ 80%, complejidad ≤ 10 por función, cumplimiento PEP8, cero vulnerabilidades.
+- **Rendimiento**: tiempo < 30 s por cada 10k registros, memoria < 500 MB para archivos de 100k, tasa de éxito ≥ 99%.
+- **Proceso**: velocidad por iteración, defectos encontrados/resueltos, tiempo de resolución y adherencia al cronograma.
+- **Herramientas clave**: Python 3.10+, VS Code, `pandas`, `psycopg2-binary`, `python-dotenv`, `pytest`, `black`, GitHub Actions, Docker (PostgreSQL local), PlantUML. Documentadas en la sección 7 del Plan Maestro.
+
+## 19. Recomendaciones Operativas
+1. Validar siempre con `data/data.example.csv` antes de usar datos reales; preservar `salida*.txt` y `logs/post_load_check.txt` como evidencia.
+2. Registrar en `reportes/` los conteos antes/después cuando se use COPY o scripts de truncado; adjuntar estos archivos a los cierres mensuales.
+3. Proteger `.env` con permisos mínimos y gestionar credenciales definitivas en un vault institucional.
+4. Ejecutar revisiones quincenales del backlog para priorizar mejoras de seguridad y automatización.
+5. Activar escaneo de dependencias (`pip-audit`, `safety`) y secret scanning en CI para anticipar riesgos.
 
 ---
-**Conclusión.** El directorio **vida-saludable** integra todos los artefactos necesarios para operar, auditar y evolucionar la carga de tamizajes ciclo 2. La combinación de documentación RUP, scripts de ingesta/validación, reportes estadísticos y controles de riesgo permite entregar trazabilidad completa y habilita el siguiente ciclo de mejoras sin depender de fuentes externas.
+**Conclusión.** El subproyecto **vida-saludable** dispone de artefactos completos para operar, auditar y evolucionar la carga de tamizajes ciclo 2. La combinación de documentación RUP, scripts de ingesta/validación, reportes estadísticos, métricas y controles de riesgo garantiza trazabilidad y habilita el siguiente ciclo de mejoras sin dependencias externas.
