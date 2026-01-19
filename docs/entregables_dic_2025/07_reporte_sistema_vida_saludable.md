@@ -173,5 +173,55 @@ Este documento concentra, en un solo lugar, toda la información relevante del s
 4. Revisar el backlog de manera quincenal para mantener priorizadas las mejoras de seguridad, automatización y observabilidad.
 5. Activar escaneo de dependencias (`pip-audit`, `safety`) y secret scanning en CI para detectar riesgos de manera temprana.
 
+## 20. Anexo Estadístico Detallado
+### 20.1 Distribución por Entidad Federativa
+Los siguientes valores provienen del procesamiento del 13 de noviembre de 2025 (totales: ciclo 1 = 3,936,812; ciclo 2 = 2,353,038; global = 6,289,850). Se listan las 20 entidades con mayor volumen y una fila adicional que agrupa al resto de los estados y códigos especiales.
+
+| Estado | Ciclo 1 | % Ciclo 1 | Ciclo 2 | % Ciclo 2 | Total | % Global |
+|--------|---------|-----------|---------|-----------|-------|----------|
+| Estado de México | 553,282 | 14.05% | 274,544 | 11.67% | 827,826 | 13.16% |
+| Veracruz | 317,891 | 8.07% | 250,852 | 10.66% | 568,743 | 9.04% |
+| Chiapas | 391,413 | 9.94% | 141,095 | 6.00% | 532,508 | 8.47% |
+| Puebla | 346,112 | 8.79% | 150,589 | 6.40% | 496,701 | 7.90% |
+| Ciudad de México | 208,125 | 5.29% | 180,741 | 7.68% | 388,866 | 6.18% |
+| Guanajuato | 167,291 | 4.25% | 177,563 | 7.55% | 344,854 | 5.48% |
+| Nuevo León | 174,608 | 4.44% | 133,391 | 5.67% | 307,999 | 4.90% |
+| Jalisco | 207,146 | 5.26% | 97,925 | 4.16% | 305,071 | 4.85% |
+| Tamaulipas | 109,477 | 2.78% | 68,844 | 2.93% | 178,321 | 2.84% |
+| Coahuila | 109,520 | 2.78% | 33,889 | 1.44% | 143,409 | 2.28% |
+| Tabasco | 78,190 | 1.99% | 66,822 | 2.84% | 145,012 | 2.31% |
+| Michoacán | 65,199 | 1.66% | 69,960 | 2.97% | 135,159 | 2.15% |
+| Chihuahua | 76,973 | 1.96% | 49,729 | 2.11% | 126,702 | 2.01% |
+| Sinaloa | 75,128 | 1.91% | 44,786 | 1.90% | 119,914 | 1.91% |
+| Sonora | 60,612 | 1.54% | 45,680 | 1.94% | 106,292 | 1.69% |
+| Morelos | 62,149 | 1.58% | 40,796 | 1.73% | 102,945 | 1.64% |
+| Aguascalientes | 63,158 | 1.60% | 39,724 | 1.69% | 102,882 | 1.64% |
+| Tlaxcala | 61,767 | 1.57% | 37,648 | 1.60% | 99,415 | 1.58% |
+| Guerrero | 63,736 | 1.62% | 35,041 | 1.49% | 98,777 | 1.57% |
+| Querétaro | 52,295 | 1.33% | 46,474 | 1.98% | 98,769 | 1.57% |
+| Otros estados y códigos especiales | 793,478 | 20.16% | 448,282 | 19.05% | 1,241,760 | 19.75% |
+
+### 20.2 Top de Escuelas y Cobertura de Contacto
+
+| Posición | CCT | Registros |
+|----------|-----|-----------|
+| 1 | 10EPR0480A | 2,201 |
+| 2 | 21EPR0010P | 1,595 |
+| 3 | 21EPR0416F | 1,535 |
+| 4 | 21EPR0419C | 1,479 |
+| 5 | 21EPR0515F | 1,459 |
+
+| Indicador | Valor |
+|-----------|-------|
+| Registros con correo del responsable | 6,289,389 (99.9%) |
+| Registros con teléfono del responsable | 6,287,520 (99.9%) |
+| Registros con estatus `CON_DESCARGA` | 4,569,700 (72.6%) |
+| Registros con estatus `SIN_DESCARGA` | 1,726,249 (27.4%) |
+
+### 20.3 Variación por Ciclo
+- Entidades con mayor incremento relativo en el ciclo 2: Michoacán (+7.3%), Guanajuato (+6.1%).
+- Entidades con mayor decremento relativo: Baja California Sur (-70.2%), Durango (-79.7%), junto con códigos especiales que representan registros residuales.
+- Los patrones muestran concentración en las mismas entidades líderes, pero con participación proporcional mayor en Veracruz, Guanajuato y Ciudad de México durante el ciclo 2.
+
 ---
 **Conclusión.** El subproyecto **vida-saludable** cuenta con todos los artefactos necesarios para ejecutar, auditar y evolucionar la carga de tamizajes del ciclo 2. La integración de scripts de ingesta y verificación, documentación metodológica, estadísticas operativas, métricas y planes de mitigación garantiza trazabilidad completa y prepara el terreno para mejoras continuas sin recurrir a documentación externa.
