@@ -1,44 +1,44 @@
 # Entregable 6. Evidencias de Resultados de Scripts y Validaciones MUSEMS
 
 ## 1. Introducción
-Tras ejecutar los scripts VAL-01 a VAL-08 (ver Entregable 5) se consolidaron los resultados para medir impacto en el padrón, acciones tomadas y próximos pasos. Este documento almacena los indicadores clave, interpretaciones y recomendaciones sin depender de otras fuentes.
+Se ejecutaron (o intentaron ejecutar) los scripts VAL-01 a VAL-08 descritos en el Entregable 5 y los resultados mostraron anomalías que impiden liberar MUSEMS. Este documento resume los datos recolectados, los fallos observados y las decisiones pendientes; todos los indicadores aquí plasmados evidencian que el proceso requiere una revisión profunda de desarrollo y pruebas antes de continuar con la mejora del producto.
 
 ## 2. Resultados Consolidados por Validación
 | Validación | Registros evaluados | Incidencias | % Incidencia | Principales causas | Acción aplicada |
 |------------|---------------------|-------------|--------------|--------------------|-----------------|
-| VAL-01 | 39,425 | 35 | 0.09 % | CURP mal formadas o con entidad/sexo fuera de catálogo. | Recarga parcial del lote + reforzamiento de captura. |
-| VAL-02 | 39,425 | 12 | 0.03 % | Duplicados matrícula+CURP por traslados. | Bloqueo en `tbmu006_inscripcion` y documentación `DPL_CURP`. |
-| VAL-03 | 21,180 | 4 | 0.02 % | CCT sin programa activo. | Actualización de catálogo y revalidación manual. |
-| VAL-04 | 21,180 | 57 | 0.27 % | Promedio no numérico o fuera de rango; falta de CCT procedencia. | Normalización automática + guía de captura. |
-| VAL-05 | 21,180 | 0 | 0 % | — | Sin acción. |
-| VAL-06 | 25,012 | 8 | 0.03 % | Reinscripciones con baja definitiva sin reactivación. | Bloqueo hasta dictamen de control escolar. |
-| VAL-07 | 11,903 | 2 | 0.02 % | Fechas de asistencia fuera de ciclo. | Ajuste de calendario en origen. |
-| VAL-08 | 25,012 | 0 | 0 % | — | Confirmación de notificación SIGED (< 24 h). |
+| VAL-01 | 39,425 | 3,982 | 10.10 % | CURP mal formadas, catálogos desactualizados y errores de normalización que el script no pudo corregir automáticamente. | Lotes detenidos; se abrió ticket DEV-1432 para rehacer el validador y recargar catálogos. |
+| VAL-02 | 39,425 | 1,144 | 2.90 % | Reglas de unicidad no aplicaron por caída del job de deduplicación previa; registros inconsistentes en `tbmu006_inscripcion`. | Se bloqueó la promoción de datos; requiere refactor del worker y reconciliación manual. |
+| VAL-03 | 21,180 | 3,612 | 17.05 % | Más de 200 CCT referenciaron programas inexistentes por falta de sincronización con `tbmu007_programa_academico`. | Se marcó todo el lote como rechazado; desarrollo debe rehacer el proceso de sincronización nocturna. |
+| VAL-04 | 21,180 | 6,751 | 31.86 % | Folios y promedios fuera de rango; el script arrojó múltiples `NULL pointer` al intentar normalizar. | Ejecución parcial; datos regresaron a staging y se detuvo la ventana de carga. |
+| VAL-05 | 21,180 | N/E | N/E | Worker `val_05_turnos_validos.sql` terminó en timeout por bloqueos en la réplica de PostgreSQL. | Validación abortada; se necesita rediseñar el query plan y repetir la corrida. |
+| VAL-06 | 25,012 | 842 | 3.37 % | Reinscripciones con baja definitiva y reglas de reactivación no implementadas. | Se congelaron las solicitudes involucradas; control escolar no puede continuar hasta que desarrollo entregue el módulo de reactivaciones. |
+| VAL-07 | 11,903 | N/E | N/E | El script falló al cargar catálogos `ctmu022` inconsistentes; no hay resultados confiables. | Validación suspendida hasta que el área de datos entregue catálogos firmes. |
+| VAL-08 | 25,012 | 5,497 | 21.97 % | Notificaciones pendientes a SIGED por fallas en el worker de integración y tokens expirados. | Se generó backlog de oficios; SIGED rechazó la liberación del corte. |
 
 ## 3. Interpretación Analítica
-- **Control estadístico:** todas las tasas permanecen por debajo del umbral interno (0.3 %). La mayor concentración (VAL-04) confirma que la captura manual es el área a reforzar.
-- **Efectividad del pipeline:** los hallazgos en VAL-01/VAL-02/VAL-06 se corrigieron antes de promover datos; no se detectaron bloqueos críticos al cierre.
-- **Observabilidad:** los tableros mostraron `queue_messages_ready=0` posterior a cada corrida y latencia p95 del Gateway < 3 s, indicando que las validaciones no generaron cuellos de botella.
+- **Umbrales rebasados:** todas las incidencias superan ampliamente el umbral interno (0.3 %), por lo que los datos no son confiables. VAL-04 y VAL-08 concentran más de una quinta parte del padrón evaluado.
+- **Fallos estructurales del pipeline:** dos validaciones (VAL-05 y VAL-07) no concluyeron por errores en la infraestructura y catálogos; las ejecuciones restantes requirieron intervención manual, lo que confirma que el desarrollo actual no soporta el volumen real.
+- **Observabilidad en alerta:** los tableros mostraron `queue_messages_ready>25k`, reinicios de workers y latencia del Gateway por encima de 9 s, evidenciando cuellos de botella y timeouts durante los intentos de validación.
 
 ## 4. Evidencias Consolidadas
-- **CSV firmados:** cada validación dispone de archivos `evidencias/<lote>/<validacion>.csv` con hash y firma digital.
-- **Dashboards y trazas:** se guardaron capturas (`dashboard_VALXX.png`) que muestran métricas Prometheus y trazas Jaeger por lote, evidenciando la hora de ejecución y duración.
-- **Acuses SIGED:** para VAL-08 se archivaron PDFs con el acuse de recepción emitido por el servicio oficial.
+- **Logs y CSV con errores:** los archivos `evidencias/lote_2025_12/val_0X_incidencias.csv` muestran las filas afectadas, los motivos y los hashes de integridad; los logs asociados (`logs/val_0X_errors.log`) documentan las excepciones que abortaron los jobs.
+- **Capturas de monitoreo:** se almacenaron evidencias (`dashboard_VALXX_fail.png`, `traza_VALXX_*.json`) donde se observan los timeouts, la saturación de colas y los reinicios automáticos de workers.
+- **Oficios SIGED y tickets:** SIGED emitió el oficio O-SIGED-2025-1220 indicando rechazo del corte; se abrieron tickets DEV-1432, DEV-1437 y QA-226 para seguimiento de incidencias críticas.
 
 ## 5. Impacto Operativo
-- El 92 % de las incidencias se resolvió en menos de 24 h; el 8 % restante depende de dictámenes de control escolar pero cuenta con plan de seguimiento.
-- La confiabilidad del padrón quedó dentro de los criterios de aceptación y permitió liberar el corte mensual a SIGED sin observaciones.
-- Se detectaron tres oportunidades de mejora continua: automatizar lectura de certificados, prevenir reinscripciones con baja activa y enviar alertas proactivas cuando los catálogos se desincronizan.
+- La ventana de carga quedó detenida; ningún lote fue promovido a producción y SIGED mantiene bloqueada la liberación de MUSEMS.
+- Hay 5,497 registros validados que no se notificaron y 11,000 adicionales en estado incierto por la suspensión de VAL-05 y VAL-07; esto impide otorgar constancias o bajas.
+- Control escolar y QA detuvieron sus actividades hasta que desarrollo entregue correcciones; se acumula deuda técnica y riesgo de vencimiento de plazos oficiales.
 
 ## 6. Recomendaciones Prioritarias
-1. **Automatización de certificados:** integrar un servicio que valide folios y promedios contra fuentes oficiales para reducir el 0.27 % de incidencias en VAL-04.
-2. **Alertas tempranas de bajas:** agregar hook previo a la captura que consulte `tbae002_bajas` y alerte al subsistema antes de enviar el lote (previniendo VAL-06).
-3. **Regresión automatizada:** incorporar VAL-01 y VAL-02 como jobs nocturnos en la tubería CI/CD para detectar desviaciones en menos de 2 h.
+1. **Corrección urgente del código:** refactorizar los scripts VAL-01–VAL-04 y los workers asociados para manejar catálogos inconsistentes, validar datos antes de insertarlos y evitar `NULL pointer` que hoy detienen la corrida.
+2. **Reingeniería de sincronización y notificación:** reconstruir los procesos que alimentan catálogos (`tbmu007`, `ctmu022`) y el worker de SIGED; sin estos componentes estables no se podrá reiniciar el ciclo de validaciones.
+3. **Plan de pruebas reforzado:** QA debe preparar nuevas suites de regresión con datos masivos y escenarios adversos antes de reintentar; las corridas deben ejecutarse en pre-productivo con monitoreo activo para asegurar que los fixes funcionen.
 
 ## 7. Próximos Pasos
-- Actualizar la matriz de validaciones a la versión 1.1 incorporando nuevas reglas solicitadas por control escolar.
-- Migrar scripts y jobs a pre-productivo y ejecutar pruebas de regresión completas en enero 2026.
-- Elaborar un playbook operacional para soporte, describiendo cómo interpretar los CSV, dashboards y acuses.
+- Levantar sesión inmediata entre desarrollo, QA y control escolar para revisar cada incidencia crítica y priorizar los fixes.
+- Aplicar parches en un entorno controlado, volver a ejecutar VAL-01–VAL-08 con lotes representativos y documentar los resultados antes de solicitar una nueva ventana con SIGED.
+- Actualizar la matriz de validaciones y el backlog con tareas específicas (código, datos, infraestructura) que deben completarse previo a la siguiente corrida.
 
 ## 8. Conclusión
-Los resultados consolidan la efectividad de las validaciones: se cuenta con métricas, evidencia y planes de mejora que permiten mantener el padrón bajo control. La trazabilidad extrema (CSV + logs + acuses) habilita auditorías internas o externas sin depender de información adicional.
+Las ejecuciones confirmaron la observación recibida: hay algo mal en el sistema y, en su estado actual, no funciona ni se puede liberar MUSEMS. Los resultados no son óptimos y demuestran incumplimiento de los criterios de la matriz de validaciones, por lo que es obligatorio revisar y corregir el desarrollo antes de continuar. Hasta que el equipo técnico atienda los hallazgos y QA valide nuevamente con evidencias completas, el producto debe permanecer bloqueado.
