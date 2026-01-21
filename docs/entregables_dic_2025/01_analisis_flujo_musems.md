@@ -51,4 +51,29 @@ Este documento resume el análisis detallado del flujo operativo de **MUSEMS (Ma
 - **Sobrecarga en horarios pico**: se habilitó escala horizontal para colas de ingestión y se monitoriza con dashboards Grafana (métricas `queue_messages_ready`, `event_processing_duration_seconds`) y alertas automáticas.
 
 ## 7. Conclusiones
-El flujo MUSEMS quedó documentado con suficiente granularidad para operar y auditar el proceso. Los puntos de control identificados permiten detener la carga ante anomalías y facilitan la toma de decisiones. Este entregable se enlaza directamente con los posteriores (planes de prueba, validaciones, scripts y evidencias) para mantener coherencia de punta a punta.
+El flujo MUSEMS quedó descrito con la trazabilidad necesaria para continuar su afinación; sin embargo, aún se requieren definiciones y entregables adicionales tanto del área usuaria como del equipo de desarrollo para garantizar el flujo completo. El usuario debe cerrar pendientes relacionados con reglas excepcionales, catálogos diferenciales y criterios de aceptación por subsistema; desarrollo debe formalizar los mecanismos de automatización de pruebas, observabilidad y gobierno de colas para cubrir todos los escenarios. Mientras estas tareas permanezcan abiertas, los puntos de control ayudan a contener riesgos, pero el proceso no puede considerarse totalmente asegurado ni listo para operación continua.
+
+## 8. Diagrama de Componentes
+```mermaid
+flowchart LR
+   subgraph Subsistemas EMS
+      prov1[Plataformas estatales]
+      prov2[Escuelas privadas]
+      prov3[Organismos federales]
+   end
+   prov1 & prov2 & prov3 --> gw[API Gateway NGINX/Kong]
+   gw --> gql[API Unificada GraphQL (Node.js + Apollo)]
+   gql --> mq[(Cola Asíncrona RabbitMQ/Kafka)]
+   mq --> w1[Workers de Ingesta y Normalización]
+   w1 --> w2[Workers de Validación/Consolidación]
+   w2 --> db[(PostgreSQL sep_muses)]
+   db --> siged[SIGED Web Services]
+   w2 -. métricas .-> obs[Stack Observabilidad (Prometheus, Grafana, ELK, Jaeger)]
+   gw -. auditoría .-> obs
+```
+
+- **Gateway** aplica controles de seguridad (`X-API-Key`, rate limiting) y enruta solo cargas válidas.
+- **API GraphQL** concentra reglas de formato, auditoría y publica eventos hacia la cola para desacoplar picos de demanda.
+- **Workers** se dividen en ingesta/normalización y validación/consolidación para aislar responsabilidades; consumen de la cola y actualizan bitácoras transaccionales.
+- **Base PostgreSQL** almacena staging y tablas maestras, exponiendo vistas específicas para notificación SIGED y para los dashboards operativos.
+- **Observabilidad** recibe métricas, logs y trazas desde gateway y workers, habilitando alertas ante fallas en cualquiera de los componentes.
