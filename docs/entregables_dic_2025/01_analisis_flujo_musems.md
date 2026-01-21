@@ -61,14 +61,14 @@ flowchart LR
       prov2[Escuelas privadas]
       prov3[Organismos federales]
    end
-   prov1 & prov2 & prov3 --> gw[API Gateway NGINX/Kong]
-   gw --> gql[API Unificada GraphQL (Node.js + Apollo)]
-   gql --> mq[(Cola Asíncrona RabbitMQ/Kafka)]
-   mq --> w1[Workers de Ingesta y Normalización]
-   w1 --> w2[Workers de Validación/Consolidación]
-   w2 --> db[(PostgreSQL sep_muses)]
-   db --> siged[SIGED Web Services]
-   w2 -. métricas .-> obs[Stack Observabilidad (Prometheus, Grafana, ELK, Jaeger)]
+   prov1 & prov2 & prov3 --> gw["API Gateway NGINX/Kong"]
+   gw --> gql["API Unificada GraphQL (Node.js + Apollo)"]
+   gql --> mq[("Cola Asíncrona RabbitMQ/Kafka")]
+   mq --> w1["Workers de Ingesta y Normalización"]
+   w1 --> w2["Workers de Validación/Consolidación"]
+   w2 --> db[("PostgreSQL sep_muses")]
+   db --> siged["SIGED Web Services"]
+   w2 -. métricas .-> obs["Stack Observabilidad (Prometheus, Grafana, ELK, Jaeger)"]
    gw -. auditoría .-> obs
 ```
 
