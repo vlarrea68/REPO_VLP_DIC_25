@@ -51,7 +51,6 @@ Las actividades se desglosan por semana y día con los campos solicitados para a
 | Tipo prueba | Actividad | Descripción | Fecha inicio | Fecha de fin |
 |-------------|-----------|-------------|--------------|--------------|
 | Seguimiento | Actualización de indicadores | KPI vs metas (cobertura, tiempo por lote, defectos críticos). | 2025-12-23 | 2025-12-23 |
-| Gestión | Sesión de defectos abiertos | Resolución o plan de acción para incidencias que requieren desarrollo. | 2025-12-24 | 2025-12-24 |
 | Planificación | Preparación de retrospectiva | Recopilación de hallazgos para discusión con áreas usuarias. | 2025-12-26 | 2025-12-26 |
 | Cierre | Sesión de retrospectiva | Revisión de AC-2401..2403 y responsables. | 2025-12-29 | 2025-12-29 |
 | Planificación | Plan enero 2026 | Definición de backlog y ventanas para nuevas pruebas/regresiones. | 2025-12-30 | 2025-12-30 |
@@ -75,8 +74,10 @@ gantt
 	Validaciones VAL-01 a VAL-08    :c2, 2025-12-16, 2d
 	Seguridad y regresión           :c3, 2025-12-18, 2d
 	section Semana 4
-	Consolidación de evidencias     :d1, 2025-12-22, 2d
-	Sesiones de cierre y planes     :d2, 2025-12-24, 5d
+	Actualización de indicadores    :d1, 2025-12-23, 1d
+	Preparación de retrospectiva    :d2, 2025-12-26, 1d
+	Sesión de retrospectiva         :d3, 2025-12-29, 1d
+	Plan enero 2026                 :d4, 2025-12-30, 1d
 ```
 
 #### Diagrama de Gantt - Semana 1
@@ -125,10 +126,9 @@ gantt
 	title Semana 4 - 22 al 31 de diciembre
 	section Semana 4
 	Actualización de indicadores    :w4a1, 2025-12-23, 1d
-	Sesión de defectos abiertos     :w4a2, 2025-12-24, 1d
-	Preparación de retrospectiva    :w4a3, 2025-12-26, 1d
-	Sesión de retrospectiva         :w4a4, 2025-12-29, 1d
-	Plan enero 2026                 :w4a5, 2025-12-30, 1d
+	Preparación de retrospectiva    :w4a2, 2025-12-26, 1d
+	Sesión de retrospectiva         :w4a3, 2025-12-29, 1d
+	Plan enero 2026                 :w4a4, 2025-12-30, 1d
 ```
 
 ## 5. Plan por Fase y Módulo
