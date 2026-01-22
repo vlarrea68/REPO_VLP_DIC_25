@@ -50,13 +50,11 @@ Las actividades se desglosan por semana y día con los campos solicitados para a
 ### Semana 4 (22-31 dic)
 | Tipo prueba | Actividad | Descripción | Fecha inicio | Fecha de fin |
 |-------------|-----------|-------------|--------------|--------------|
-| Evidencias | Consolidación de bitácoras | Recolección de CSV, hashes y reportes para cada caso ejecutado. | 2025-12-22 | 2025-12-22 |
 | Seguimiento | Actualización de indicadores | KPI vs metas (cobertura, tiempo por lote, defectos críticos). | 2025-12-23 | 2025-12-23 |
 | Gestión | Sesión de defectos abiertos | Resolución o plan de acción para incidencias que requieren desarrollo. | 2025-12-24 | 2025-12-24 |
 | Planificación | Preparación de retrospectiva | Recopilación de hallazgos para discusión con áreas usuarias. | 2025-12-26 | 2025-12-26 |
 | Cierre | Sesión de retrospectiva | Revisión de AC-2401..2403 y responsables. | 2025-12-29 | 2025-12-29 |
 | Planificación | Plan enero 2026 | Definición de backlog y ventanas para nuevas pruebas/regresiones. | 2025-12-30 | 2025-12-30 |
-| Administración | Publicación de informe final | Emisión de informe consolidado y almacenamiento en repositorio. | 2025-12-31 | 2025-12-31 |
 
 ### Diagrama de Gantt
 ```mermaid
@@ -79,7 +77,58 @@ gantt
 	section Semana 4
 	Consolidación de evidencias     :d1, 2025-12-22, 2d
 	Sesiones de cierre y planes     :d2, 2025-12-24, 5d
-	Informe final                   :d3, 2025-12-31, 1d
+```
+
+#### Diagrama de Gantt - Semana 1
+```mermaid
+gantt
+	dateFormat  YYYY-MM-DD
+	title Semana 1 - 1 al 5 de diciembre
+	section Semana 1
+	Kick-off y alcance              :w1a1, 2025-12-01, 1d
+	Refresco de ambientes           :w1a2, 2025-12-02, 1d
+	Smoke de ingestión              :w1a3, 2025-12-03, 1d
+	Ejecución CP-008                :w1a4, 2025-12-04, 1d
+	Ejecución CP-017 y checklist    :w1a5, 2025-12-05, 1d
+```
+
+#### Diagrama de Gantt - Semana 2
+```mermaid
+gantt
+	dateFormat  YYYY-MM-DD
+	title Semana 2 - 8 al 12 de diciembre
+	section Semana 2
+	Escenario 1 inscripciones       :w2a1, 2025-12-08, 1d
+	Escenario 2 bajas/reactivaciones:w2a2, 2025-12-09, 1d
+	Escenario 3 alternos            :w2a3, 2025-12-10, 1d
+	Gestión de defectos             :w2a4, 2025-12-11, 1d
+	Reejecuciones controladas       :w2a5, 2025-12-12, 1d
+```
+
+#### Diagrama de Gantt - Semana 3
+```mermaid
+gantt
+	dateFormat  YYYY-MM-DD
+	title Semana 3 - 15 al 19 de diciembre
+	section Semana 3
+	Reejecución integral            :w3a1, 2025-12-15, 1d
+	VAL-01 a VAL-04                 :w3a2, 2025-12-16, 1d
+	VAL-05 a VAL-08                 :w3a3, 2025-12-17, 1d
+	Pruebas de seguridad            :w3a4, 2025-12-18, 1d
+	Regresión parcial               :w3a5, 2025-12-19, 1d
+```
+
+#### Diagrama de Gantt - Semana 4
+```mermaid
+gantt
+	dateFormat  YYYY-MM-DD
+	title Semana 4 - 22 al 31 de diciembre
+	section Semana 4
+	Actualización de indicadores    :w4a1, 2025-12-23, 1d
+	Sesión de defectos abiertos     :w4a2, 2025-12-24, 1d
+	Preparación de retrospectiva    :w4a3, 2025-12-26, 1d
+	Sesión de retrospectiva         :w4a4, 2025-12-29, 1d
+	Plan enero 2026                 :w4a5, 2025-12-30, 1d
 ```
 
 ## 5. Plan por Fase y Módulo
