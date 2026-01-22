@@ -18,12 +18,69 @@ Definir el plan integral de pruebas funcionales y técnicas del proceso MUSEMS p
 | Criterios de Salida | 0 defectos críticos abiertos, cobertura ≥ 95 % de escenarios críticos, métricas de rendimiento < 3 s promedio, bitácoras completas y acta de conformidad firmada. |
 
 ## 4. Calendario Operativo (Diciembre 2025)
-| Semana | Actividades clave | Entregables |
-|--------|------------------|-------------|
-| 1 (2-6 dic) | Kick-off, repaso de alcance, refresco de ambientes, smoke de ingestión, ejecución de casos CP-008/CP-017. | Acta inicio + checklist de ambientes. |
-| 2 (9-13 dic) | Escenarios nominales/alternos de inscripciones y bajas (Escenarios 1-3 de los módulos en la guía). Gestión de defectos BUG-101..103. | Reporte diario de avance + tablero Kanban. |
-| 3 (16-20 dic) | Reejecución tras correcciones, validaciones VAL-01 a VAL-08, pruebas de seguridad básica y regresión parcial. | Logs firmados + CSV de incidencias. |
-| 4 (23-27 dic) | Consolidación de evidencias, sesión de cierre, retrospectiva y planificación enero 2026. | Informe final + minuta AC-2401..2403. |
+Las actividades se desglosan por semana y día con los campos solicitados para asegurar trazabilidad diaria.
+
+### Semana 1 (1-5 dic)
+| Tipo prueba | Actividad | Descripción | Fecha inicio | Fecha de fin |
+|-------------|-----------|-------------|--------------|--------------|
+| Planificación | Kick-off y repaso de alcance | Taller con QA, desarrollo y control escolar para alinear objetivos y dependencias. | 2025-12-01 | 2025-12-01 |
+| Preparación | Refresco de ambientes y credenciales | Reinicio de pods, actualización de catálogos y validación de accesos OIDC. | 2025-12-02 | 2025-12-02 |
+| Smoke | Smoke de ingestión | Carga de lote `L-2025-12-02` para verificar cola, workers y BD. | 2025-12-03 | 2025-12-03 |
+| Funcional | Ejecución CP-008 | Caso de inscripciones nominales con CURP válidas; registro en bitácora. | 2025-12-04 | 2025-12-04 |
+| Funcional | Ejecución CP-017 y checklist | Caso de duplicidad matrícula+CURP y checklist de ambientes; reporte diario. | 2025-12-05 | 2025-12-05 |
+
+### Semana 2 (8-12 dic)
+| Tipo prueba | Actividad | Descripción | Fecha inicio | Fecha de fin |
+|-------------|-----------|-------------|--------------|--------------|
+| Funcional | Escenario 1: Inscripciones nominales | Lotes CP-008/CP-009 completos con monitoreo de defectos BUG-101. | 2025-12-08 | 2025-12-08 |
+| Funcional | Escenario 2: Bajas y reactivaciones | Ejecución CP-010 y CP-011 con seguimiento de `tbae002_bajas`. | 2025-12-09 | 2025-12-09 |
+| Funcional | Escenario 3: Alternos (CCT inactivo, CURP duplicada) | Casos CP-015/CP-016 con captura de evidencias en CSV y dashboard. | 2025-12-10 | 2025-12-10 |
+| Gestión defectos | Board Kanban y BUG-101..103 | Reunión diaria para triage, asignación y actualización de métricas. | 2025-12-11 | 2025-12-11 |
+| Funcional | Reejecuciones controladas | Validación de fixes en ambiente QA antes de pasar a semana 3. | 2025-12-12 | 2025-12-12 |
+
+### Semana 3 (15-19 dic)
+| Tipo prueba | Actividad | Descripción | Fecha inicio | Fecha de fin |
+|-------------|-----------|-------------|--------------|--------------|
+| Funcional | Reejecución integral | Lotes completos tras correcciones para medir reincidencia de defectos. | 2025-12-15 | 2025-12-15 |
+| Validaciones | VAL-01 a VAL-04 | Ejecución de scripts de integridad CURP, unicidad y programas académicos. | 2025-12-16 | 2025-12-16 |
+| Validaciones | VAL-05 a VAL-08 | Turnos, bajas y notificación SIGED con captura de logs firmados. | 2025-12-17 | 2025-12-17 |
+| Seguridad | Pruebas básicas de seguridad | Escaneo de endpoints, revisión de roles y pruebas de autorización negativa. | 2025-12-18 | 2025-12-18 |
+| Regresión | Regresión parcial prioritaria | Suite automatizada sobre casos críticos antes de congelar cambios. | 2025-12-19 | 2025-12-19 |
+
+### Semana 4 (22-31 dic)
+| Tipo prueba | Actividad | Descripción | Fecha inicio | Fecha de fin |
+|-------------|-----------|-------------|--------------|--------------|
+| Evidencias | Consolidación de bitácoras | Recolección de CSV, hashes y reportes para cada caso ejecutado. | 2025-12-22 | 2025-12-22 |
+| Seguimiento | Actualización de indicadores | KPI vs metas (cobertura, tiempo por lote, defectos críticos). | 2025-12-23 | 2025-12-23 |
+| Gestión | Sesión de defectos abiertos | Resolución o plan de acción para incidencias que requieren desarrollo. | 2025-12-24 | 2025-12-24 |
+| Planificación | Preparación de retrospectiva | Recopilación de hallazgos para discusión con áreas usuarias. | 2025-12-26 | 2025-12-26 |
+| Cierre | Sesión de retrospectiva | Revisión de AC-2401..2403 y responsables. | 2025-12-29 | 2025-12-29 |
+| Planificación | Plan enero 2026 | Definición de backlog y ventanas para nuevas pruebas/regresiones. | 2025-12-30 | 2025-12-30 |
+| Administración | Publicación de informe final | Emisión de informe consolidado y almacenamiento en repositorio. | 2025-12-31 | 2025-12-31 |
+
+### Diagrama de Gantt
+```mermaid
+gantt
+	dateFormat  YYYY-MM-DD
+	title Cronograma de Pruebas MUSEMS - Diciembre 2025
+	section Semana 1
+	Kick-off y alcance              :a1, 2025-12-01, 1d
+	Refresco de ambientes           :a2, 2025-12-02, 1d
+	Smoke de ingestión              :a3, 2025-12-03, 1d
+	Casos CP-008/CP-017             :a4, 2025-12-04, 2d
+	section Semana 2
+	Escenarios nominales/alternos   :b1, 2025-12-08, 3d
+	Gestión de defectos             :b2, 2025-12-11, 1d
+	Reejecuciones controladas       :b3, 2025-12-12, 1d
+	section Semana 3
+	Reejecución integral            :c1, 2025-12-15, 1d
+	Validaciones VAL-01 a VAL-08    :c2, 2025-12-16, 2d
+	Seguridad y regresión           :c3, 2025-12-18, 2d
+	section Semana 4
+	Consolidación de evidencias     :d1, 2025-12-22, 2d
+	Sesiones de cierre y planes     :d2, 2025-12-24, 5d
+	Informe final                   :d3, 2025-12-31, 1d
+```
 
 ## 5. Plan por Fase y Módulo
 ### Preparación
